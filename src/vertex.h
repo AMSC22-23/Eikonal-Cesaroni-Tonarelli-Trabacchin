@@ -10,15 +10,13 @@
 template <int N>
 class Vertex {
 public:
-    Vertex() {
+    Vertex(int id) : id(id){
         for(int i = 0; i < N; i++) {
             this->coord[i] = 0.0;
         }
     }
 
-    Vertex(const std::array<double, N> &input) {
-        this->coord = input;
-    }
+    Vertex(const std::array<double, N> &input, int id) : id(id), coord(input) {}
 
     double norm() const {
         double sum = 0;
@@ -32,7 +30,7 @@ public:
         return std::inner_product(this->coord.begin(), this->coord.end(), other.coord.begin());
     }
 
-    Vertex& operator+ (const Vertex<N>& other) const {
+    Vertex operator+ (const Vertex<N>& other) const {
         Vertex sum;
         for(int i = 0; i < N; i++) {
             sum.coord [i] = this->coord[i] + other.coord[i];
@@ -40,7 +38,7 @@ public:
         return sum;
     }
 
-    Vertex& operator- (const Vertex<N>& other) const {
+    Vertex operator- (const Vertex<N>& other) const {
         Vertex diff;
         for(int i = 0; i < N; i++) {
             diff.coord [i] = this->coord[i] - other.coord[i];
@@ -48,11 +46,24 @@ public:
         return diff;
     }
 
+    double getDistance(const std::array<double, N>& coords) const {
+        double sum = 0;
+        for(int i = 0; i < N; i++) {
+            sum += (this->coord[i] - coords[i]) * (this->coord[i] - coords[i]);
+        }
+        return sqrt(sum);
+    }
+
     double operator[] (int index) const{
         return this->coord[index];
     }
 
+    int getId() {
+        return id;
+    }
+
 private:
     std::array<double, N> coord;
+    int id;
 };
 #endif //EIKONAL_CESARONI_TONARELLI_TRABACCHIN_VERTEX_H
