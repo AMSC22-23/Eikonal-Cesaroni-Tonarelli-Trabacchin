@@ -5,6 +5,7 @@
 #ifndef EIKONAL_CESARONI_TONARELLI_TRABACCHIN_CIRCULARLIST_H
 #define EIKONAL_CESARONI_TONARELLI_TRABACCHIN_CIRCULARLIST_H
 #include "vertex.h"
+#include <iostream>
 // creating class using the class keyword
 template<int N>
 class CircularList {
@@ -12,10 +13,11 @@ class CircularList {
     class Node
     {
     public:
-        Vertex<N>& data = 0;
+        std::shared_ptr<Vertex<N>> data;
         Node* next = 0;
 
-        Node(const Vertex<N>& user_data) : data(user_data) {}
+        Node(std::shared_ptr<Vertex<2>> user_data) : data(user_data) {};
+
 
     };
 public:
@@ -25,12 +27,12 @@ public:
         prec = nullptr;
     }
 
-    Vertex<N>& getNext() {
+    std::shared_ptr<Vertex<N>> getNext() {
         prec = prec->next;
-        return prec;
+        return prec->data;
     }
 
-    void add(Vertex<N> v) {
+    void add(std::shared_ptr<Vertex<N>> v) {
         Node* node = new Node(v);
         if(isEmpty()) {
             node -> next = node;
@@ -40,7 +42,8 @@ public:
         }
         else {
             tail->next = node;
-            node->next = &head;
+            tail = tail->next;
+            tail->next = head;
         }
     }
 
@@ -60,15 +63,26 @@ public:
         return head == nullptr;
     }
 
-    bool isPresent(const Vertex<N>& v){
+    bool isPresent(std::shared_ptr<Vertex<N>> v){
         Node* tmp = tail;
         do {
             tmp = tmp->next;
-            if(tmp->data.getId() == v.getId()){
+            if(tmp->data->getId() == v->getId()){
                 return true;
             }
         } while(tmp->next != head);
         return false;
+    }
+
+    friend std::ostream& operator<< (std::ostream& os, const CircularList<N>& list) {
+        Node* tmp = list.head;
+        os << "List = ";
+        do {
+            os << *(tmp->data) << " ";
+            tmp = tmp->next;
+        } while(tmp != list.head);
+        os << "\n";
+        return os;
     }
 
 private:
