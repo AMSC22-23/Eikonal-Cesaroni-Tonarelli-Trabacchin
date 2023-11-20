@@ -7,6 +7,7 @@
 #include <array>
 #include <cmath>
 #include <numeric>
+#include <iostream>
 template <int N>
 class Vertex {
 public:
@@ -60,6 +61,15 @@ public:
 
     int getId() {
         return id;
+    }
+
+    friend std::ostream& operator<< (std::ostream& os, const Vertex<N>& vec) {
+        os << "(";
+        for(int i = 0; i < N; i++) {
+            os << vec.coord[i] << ((i != N-1) ? ", " : "");
+        }
+        os << ")";
+        return os;
     }
 
 private:
