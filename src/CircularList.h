@@ -1,93 +1,116 @@
 //
-// Created by tomma on 19/11/2023.
+// Created by tomma on 20/11/2023.
 //
 
 #ifndef EIKONAL_CESARONI_TONARELLI_TRABACCHIN_CIRCULARLIST_H
 #define EIKONAL_CESARONI_TONARELLI_TRABACCHIN_CIRCULARLIST_H
 #include "vertex.h"
-#include <iostream>
-// creating class using the class keyword
-template<int N>
+template <typename T, int N>
 class CircularList {
-
-    class Node
-    {
-    public:
-        std::shared_ptr<Vertex<N>> data;
-        Node* next = 0;
-
-        Node(std::shared_ptr<Vertex<2>> user_data) : data(user_data) {};
-
-
+    struct Node {
+        T& data;
+        Node* next;
+        Node(T& data) : data(data){};
     };
 public:
-    CircularList(){
-        tail = nullptr;
+    CircularList() {
         head = nullptr;
+        tail = nullptr;
         prec = nullptr;
     }
-
-    std::shared_ptr<Vertex<N>> getNext() {
-        prec = prec->next;
-        return prec->data;
-    }
-
-    void add(std::shared_ptr<Vertex<N>> v) {
-        Node* node = new Node(v);
-        if(isEmpty()) {
-            node -> next = node;
-            tail = node;
-            head = node;
-            prec = node;
-        }
-        else {
-            tail->next = node;
-            tail = tail->next;
-            tail->next = head;
+    void add(T& v) {
+        Node* newNode = new Node(v);
+        if(tail != nullptr) {
+            newNode -> next = head;
+            tail -> next = newNode;
+            if(tail == prec) {
+                prec = newNode;
+            }
+            tail = newNode;
+        } else {
+            tail = newNode;
+            head = newNode;
+            prec = newNode;
+            tail -> next = head;
         }
     }
 
-    void remove(){
-        Node* successor = prec->next->next;
-        delete prec->next;
-        if(successor == prec->next){
-            tail = nullptr;
+    void remove() {
+        if(head == tail) {
+            delete head;
             head = nullptr;
+            tail = nullptr;
             prec = nullptr;
         } else {
-            prec->next = successor;
+            Node* nodeToRemove = prec -> next;
+            if(nodeToRemove == head) {
+                Node* newHead = nodeToRemove -> next;
+                head = newHead;
+            } else if(nodeToRemove == tail) {
+                Node* newTail = prec;
+                head = newTail;
+            }
+            prec -> next = nodeToRemove -> next;
+            delete nodeToRemove;
         }
+
+
     }
 
-    bool isEmpty(){
-        return head == nullptr;
+    T& getNext() {
+        Node* nodeToReturn = prec -> next;
+        prec = nodeToReturn;
+        return nodeToReturn -> data;
     }
 
-    bool isPresent(std::shared_ptr<Vertex<N>> v){
-        Node* tmp = tail;
+    bool isEmpty() {
+        return head == tail;
+    }
+
+    bool isPresent(T& v) {
+        Node* curr = head;
         do {
-            tmp = tmp->next;
-            if(tmp->data->getId() == v->getId()){
+            if(curr == nullptr) {
+                return false;
+            }
+            if(curr -> data.getId() == v.getId()) {
                 return true;
             }
-        } while(tmp->next != head);
+            curr = curr -> next;
+        }while(curr != head && curr != nullptr);
+
         return false;
     }
 
-    friend std::ostream& operator<< (std::ostream& os, const CircularList<N>& list) {
+    friend std::ostream& operator<< (std::ostream& os, const CircularList<T, N>& list) {
         Node* tmp = list.head;
         os << "List = ";
         do {
-            os << *(tmp->data) << " ";
+            os << (tmp->data) << " ";
             tmp = tmp->next;
         } while(tmp != list.head);
         os << "\n";
         return os;
     }
 
+    ~CircularList() {
+        if(head != nullptr) {
+            Node* curr = head;
+            Node* next;
+            while(true) {
+                next = curr -> next;
+                delete curr;
+                curr = next;
+                if(curr == head) {
+                    break;
+                }
+            }
+        }
+    }
+
 private:
-    Node* prec;
     Node* head;
     Node* tail;
+    Node* prec;
 };
 #endif //EIKONAL_CESARONI_TONARELLI_TRABACCHIN_CIRCULARLIST_H
