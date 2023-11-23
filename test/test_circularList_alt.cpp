@@ -8,7 +8,7 @@
 
 int main(){
     // We create a Circular list with (1,1) - (2,2) - (3,3) - (4,4) - (5,5) with vertices of size 2
-    CircularList_alt<2> list = CircularList<2>();
+    CircularList<Vertex<2>> list;
     assert(list.isEmpty());
     for(int i = 1; i <= 4; i++){
         std::array<double, 2> a({i*1., i*1.});

@@ -4,7 +4,7 @@
  *  Created on: Jun 18, 2022
  *      Author: forma
  */
-#include "../LocalProblem_/include/solveEikonalLocalProblem.hpp"
+#include "../localProblem/include/solveEikonalLocalProblem.hpp"
 #if DIMENSION==2
 template class Eikonal::solveEikonalLocalProblem<2u>;
 constexpr std::size_t PHDIM=2u;

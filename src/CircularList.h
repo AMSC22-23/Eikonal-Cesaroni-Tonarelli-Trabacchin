@@ -5,7 +5,7 @@
 #ifndef EIKONAL_CESARONI_TONARELLI_TRABACCHIN_CIRCULARLIST_H
 #define EIKONAL_CESARONI_TONARELLI_TRABACCHIN_CIRCULARLIST_H
 #include "vertex.h"
-template <typename T, int N>
+template <typename T>
 class CircularList {
     struct Node {
         T& data;
@@ -82,7 +82,7 @@ public:
         return false;
     }
 
-    friend std::ostream& operator<< (std::ostream& os, const CircularList<T, N>& list) {
+    friend std::ostream& operator<< (std::ostream& os, const CircularList<T>& list) {
         Node* tmp = list.head;
         os << "List = ";
         do {
