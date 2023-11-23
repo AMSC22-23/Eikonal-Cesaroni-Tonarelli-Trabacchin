@@ -90,6 +90,7 @@ public:
            }
            res += "\n";
        }
+       return res;
     }
 
 

@@ -9,10 +9,6 @@ include_directories("localProblem/include")
 add_compile_options(-I${mkEigenInc})
 
 add_executable(Eikonal_Cesaroni_Tonarelli_Trabacchin
-        localProblem/DescentDirectionFactory.cpp
-        localProblem/DescentDirections.cpp
-        localProblem/LineSearchSolver.cpp
-        localProblem/main_eikonal.cpp
-        localProblem/solveEikonalLocalProblem.cpp
         src/vertex.h
-        src/Lattice2DSolver.h src/Lattice2DMesh.h src/LatticeMesh.h src/CircularList.h test/test_circularList_alt.cpp src/Mesh.h localProblem/include/DescentDirectionBase.hpp src/main.cpp)
+        src/Lattice2DSolver.h src/Lattice2DMesh.h src/LatticeMesh.h src/Mesh.h src/main.cpp
+        test/test_triangularMesh.cpp)
