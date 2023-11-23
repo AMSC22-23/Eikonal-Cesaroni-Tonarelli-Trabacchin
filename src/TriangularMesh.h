@@ -12,8 +12,9 @@
 #include <set>
 #include<algorithm>
 template<int D>
-class TriangleMesh {
-    TriangleMesh(const std::string& mesh_file_path){
+class TriangularMesh {
+public:
+    TriangularMesh(const std::string& mesh_file_path){
         std::ifstream mesh_file (mesh_file_path);
         if(mesh_file.is_open()) {
             std::string buffer;
@@ -72,6 +73,7 @@ class TriangleMesh {
             }
         }
     }
+
     std::string toString() {
         int cont = 0;
         int index = 0;
