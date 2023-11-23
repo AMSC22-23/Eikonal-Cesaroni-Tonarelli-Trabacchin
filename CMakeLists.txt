@@ -15,4 +15,4 @@ add_executable(Eikonal_Cesaroni_Tonarelli_Trabacchin
         localProblem/main_eikonal.cpp
         localProblem/solveEikonalLocalProblem.cpp
         src/vertex.h
-        src/Lattice2DSolver.h src/Lattice2DMesh.h src/LatticeMesh.h src/utils/FillingLooper.h src/utils/CreatingLooper.h src/CircularList.h test/test_circularList_alt.cpp src/Mesh.h localProblem/include/DescentDirectionBase.hpp src/main.cpp)
+        src/Lattice2DSolver.h src/Lattice2DMesh.h src/LatticeMesh.h src/CircularList.h test/test_circularList_alt.cpp src/Mesh.h localProblem/include/DescentDirectionBase.hpp src/main.cpp)
