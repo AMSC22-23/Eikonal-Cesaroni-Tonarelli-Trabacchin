@@ -10,7 +10,8 @@
 #include <fstream>
 #include <iostream>
 #include <set>
-#include<algorithm>
+#include <algorithm>
+
 template<int D>
 class TriangularMesh {
 public:
@@ -112,6 +113,19 @@ public:
             }
             res += "\n";
         }
+        return res;
+    }
+
+    int getNumberVertices() const{
+        return geo.size() / D;
+    }
+
+    std::vector<int> getNeighbors(int vertex){
+        std::set<int> neighbors;
+        for(int i = ngh[vertex]; i < (vertex != ngh.size() -1 ? ngh[vertex + 1] : shapes.size()); i++){
+            neighbors.insert(shapes[i]);
+        }
+        std::vector<int> res(neighbors.begin(), neighbors.end());
         return res;
     }
 
