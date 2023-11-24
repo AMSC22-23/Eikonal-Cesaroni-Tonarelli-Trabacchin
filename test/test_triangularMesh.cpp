@@ -7,7 +7,7 @@
 int main(){
     std::string fileName = "../test/triangular_mesh_test.vtx";
     TriangularMesh<2> mesh (fileName);
-    std::cout << mesh.toString() << std::endl;
+    std::cout << mesh.toString_alt() << std::endl;
 
 
 
