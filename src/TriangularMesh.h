@@ -129,6 +129,22 @@ public:
         return res;
     }
 
+    std::vector<int> getTriangles(int vertex){
+        std::vector<int> triangles;
+        for(int i = ngh[vertex]; i < (vertex != ngh.size() -1 ? ngh[vertex + 1] : shapes.size()); i++){
+            triangles.push_back(shapes[i]);
+        }
+        return triangles;
+    }
+
+    std::array<double, D> getCoordinates(int vertex){
+        std::array<double,D> coord;
+        for(int i = vertex; i < vertex + D; i++){
+            coord[i-vertex] = geo[i];
+        }
+        return coord;
+    }
+
 
 private:
     std::vector<double> geo;
