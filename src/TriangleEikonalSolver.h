@@ -1,0 +1,16 @@
+//
+// Created by tomma on 24/11/2023.
+//
+
+#ifndef EIKONAL_CESARONI_TONARELLI_TRABACCHIN_TRIANGLEEIKONALSOLVER_H
+#define EIKONAL_CESARONI_TONARELLI_TRABACCHIN_TRIANGLEEIKONALSOLVER_H
+
+#include "TriangularMesh.h"
+
+template<int D>
+class TriangleEikonalSolver {
+private:
+    TriangularMesh<D> mesh;
+
+};
+#endif //EIKONAL_CESARONI_TONARELLI_TRABACCHIN_TRIANGLEEIKONALSOLVER_H
