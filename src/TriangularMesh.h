@@ -26,6 +26,7 @@ public:
             int vertices_number;
             mesh_file>>vertices_number;
             mesh_file>>buffer;
+            std::cout << vertices_number << std::endl;
             geo.resize(vertices_number*D);
             for(int i=0; i<vertices_number*D; i++){
                 mesh_file>>geo[i];
@@ -71,6 +72,9 @@ public:
                     }
                 }
             }
+            mesh_file.close();
+        } else {
+            std::cout << "opppppsssss" << std::endl;
         }
     }
 
@@ -80,7 +84,7 @@ public:
         std::string res = "";
        while(true) {
            res+= "vertex " + std::to_string(cont) + ": " ;
-           for(int i=index; i< (cont != ngh.size()-1 ? ngh[cont+1] : shapes.size()); i+=2){
+           for(int i=index; i< (cont < ngh.size()-1 ? ngh[cont+1] : shapes.size()); i+=2){
                res+=std::to_string(shapes[i]) + " " + std::to_string (shapes[i+1]) + ", ";
                index = i;
            }
