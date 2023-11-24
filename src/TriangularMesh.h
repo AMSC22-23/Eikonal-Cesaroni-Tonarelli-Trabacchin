@@ -15,6 +15,7 @@ template<int D>
 class TriangularMesh {
 public:
     static constexpr int vertices_per_triangle = 3;
+
     TriangularMesh(const std::string& mesh_file_path){
         std::ifstream mesh_file (mesh_file_path);
         if(mesh_file.is_open()) {
@@ -27,7 +28,6 @@ public:
             int vertices_number;
             mesh_file>>vertices_number;
             mesh_file>>buffer;
-            std::cout << vertices_number << std::endl;
             geo.resize(vertices_number*D);
             for(int i=0; i<vertices_number*D; i++){
                 mesh_file>>geo[i];
@@ -96,8 +96,27 @@ public:
        return res;
     }
 
+    std::string toString_alt(){
+        std::string res = "";
+        int odd = 0;
+        for(int i = 0 ; i < ngh.size(); i++){
+            res += "vertex " + std::to_string(i) + ": ";
+            odd = 0;
+            for(int j = ngh[i]; j < ( i != ngh.size() - 1 ? ngh[i+1] : shapes.size()); j++){
+                if(!odd){
+                    res += std::to_string(shapes[j]) + " ";
+                } else {
+                    res += std::to_string(shapes[j]) + ",  ";
+                }
+                odd = (odd + 1) % 2;
+            }
+            res += "\n";
+        }
+        return res;
+    }
 
-//private:
+
+private:
     std::vector<double> geo;
     std::vector<int> shapes;
     std::vector<int> ngh;
