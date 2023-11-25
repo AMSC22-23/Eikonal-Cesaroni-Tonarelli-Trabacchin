@@ -73,7 +73,7 @@ public:
             if(curr == nullptr) {
                 return false;
             }
-            if(curr -> data.getId() == v.getId()) {
+            if(curr -> data == v) {
                 return true;
             }
             curr = curr -> next;

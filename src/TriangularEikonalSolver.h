@@ -5,13 +5,13 @@
 #ifndef EIKONAL_CESARONI_TONARELLI_TRABACCHIN_TRIANGULAREIKONALSOLVER_H
 #define EIKONAL_CESARONI_TONARELLI_TRABACCHIN_TRIANGULAREIKONALSOLVER_H
 
-#define DIMENSION 2
+#define eikonal_tol 1e-6
 
 #include "TriangularMesh.h"
 #include "CircularList.h"
 #include <float.h>
 #include "Phi.hpp"
-#include "solveEikonalLocalProblem.hpp"
+#include "../localProblem/include/solveEikonalLocalProblem.hpp"
 
 template<int D>
 class TriangularEikonalSolver {
@@ -27,7 +27,7 @@ public:
         }
     };
 
-    void solver(){
+    void solve(){
         for(auto bv : boundary_vertices){
             for(auto neighbor : mesh.getNeighbors(bv)){
                 active_list.add(neighbor);
@@ -36,7 +36,23 @@ public:
 
         while(!active_list.isEmpty()){
             int v = active_list.getNext();
-            // here local solver
+            double old_solution = solutions_in[v];
+            double new_solution = update(v);
+            solutions_in[v] = new_solution;
+            if(std::abs(old_solution - new_solution) < eikonal_tol) {
+                std::vector<int> v_neighbours = mesh.getNeighbors(v);
+                for(auto b : v_neighbours) {
+                    if(!active_list.isPresent(b)) {
+                        double old_solution_b = solutions_in[b];
+                        double new_solution_b = update(b);
+                        if(old_solution_b > new_solution_b) {
+                            solutions_in[b] = new_solution_b;
+                            active_list.add(b);
+                        }
+                    }
+
+                }
+            }
 
 
         }
@@ -74,7 +90,8 @@ private:
         }
 
         double min = *std::min_element(solutions.begin(), solutions.end());
-        solutions_out[vertex] = min;
+        //solutions_out[vertex] = min;
+        //solutions_in[vertex] = min;
         return min;
     }
 
@@ -97,8 +114,8 @@ private:
         values << solutions_base[0], solutions_base[1];          //values of u at the base
         Eikonal::SimplexData<PHDIM> simplex{{p1, p2, p3}, M};
 
-        Eikonal::solveEikonalLocalProblem<PHDIM> solver{simplex,values};
-        auto sol = solver();
+        Eikonal::solveEikonalLocalProblem<PHDIM> localSolver{simplex,values};
+        auto sol = localSolver();
 
         return sol.value;
     }
