@@ -1,116 +1,110 @@
 //
-// Created by tomma on 20/11/2023.
+// Created by tomma on 26/11/2023.
 //
 
 #ifndef EIKONAL_CESARONI_TONARELLI_TRABACCHIN_CIRCULARLIST_H
 #define EIKONAL_CESARONI_TONARELLI_TRABACCHIN_CIRCULARLIST_H
-#include "vertex.h"
-template <typename T>
+
+#include <cassert>
+#include <iostream>
+
 class CircularList {
     struct Node {
-        T& data;
+        int data;
         Node* next;
-        Node(T& data) : data(data){};
+        explicit Node(int data):data(data), next(nullptr) {}
     };
 public:
     CircularList() {
         head = nullptr;
-        tail = nullptr;
         prec = nullptr;
     }
-    void add(T& v) {
+    int getNext() {
+        prec = safe_advance(prec);
+        return prec -> data;
+    }
+
+    void add(int v) {
         Node* newNode = new Node(v);
-        if(tail != nullptr) {
-            newNode -> next = head;
-            tail -> next = newNode;
-            if(tail == prec) {
-                prec = newNode;
-            }
-            tail = newNode;
-        } else {
-            tail = newNode;
+        if(head == nullptr) {
+            newNode -> next = nullptr;
             head = newNode;
             prec = newNode;
-            tail -> next = head;
+        } else {
+            if(prec -> next != nullptr) {
+                Node* curr = prec -> next;
+                newNode -> next = curr;
+                prec -> next = newNode;
+                prec = newNode;
+            } else {
+                newNode -> next = nullptr;
+                prec -> next = newNode;
+                prec = newNode;
+            }
         }
     }
 
     void remove() {
-        if(head == tail) {
+        assert(head != nullptr);
+        if(head -> next == nullptr) {//the list contains only one element
             delete head;
             head = nullptr;
-            tail = nullptr;
             prec = nullptr;
         } else {
-            Node* nodeToRemove = prec -> next;
-            if(nodeToRemove == head) {
-                Node* newHead = nodeToRemove -> next;
+            if(safe_advance(prec) == head) { //head is to be eliminated, and it is not the only element in the list
+                Node* newHead = head -> next;
+                delete head;
                 head = newHead;
-            } else if(nodeToRemove == tail) {
-                Node* newTail = prec;
-                head = newTail;
+            } else {
+                if((prec -> next) -> next == nullptr) {//the last element of the list is to be eliminated, and it is not the only element in the list
+                    delete prec -> next;
+                    prec -> next = nullptr;
+                } else {// the element to be eliminated is a middle one, and it not the only one in the list
+                    Node* nodeToRemove = prec -> next;
+                    prec -> next = nodeToRemove -> next;
+                    delete nodeToRemove;
+                }
             }
-            prec -> next = nodeToRemove -> next;
-            delete nodeToRemove;
+
         }
-
-
-    }
-
-    T& getNext() {
-        Node* nodeToReturn = prec -> next;
-        prec = nodeToReturn;
-        return nodeToReturn -> data;
     }
 
     bool isEmpty() {
-        return head == tail;
+        return head == nullptr;
     }
 
-    bool isPresent(T& v) {
+    bool isPresent(int v) {
+        assert(head != nullptr);
         Node* curr = head;
         do {
-            if(curr == nullptr) {
-                return false;
-            }
             if(curr -> data == v) {
                 return true;
+            } else {
+                curr = curr -> next;
             }
-            curr = curr -> next;
-        }while(curr != head && curr != nullptr);
-
+        }while(curr != nullptr);
         return false;
     }
 
-    friend std::ostream& operator<< (std::ostream& os, const CircularList<T>& list) {
-        Node* tmp = list.head;
-        os << "List = ";
+    friend std::ostream& operator<<(std::ostream& os, const CircularList& other) {
+        assert(other.head != nullptr);
+        Node* curr = other.head;
         do {
-            os << (tmp->data) << " ";
-            tmp = tmp->next;
-        } while(tmp != list.head);
-        os << "\n";
+            os << curr -> data << " ";
+            curr = curr -> next;
+        }while(curr != nullptr);
+        os << std::endl;
         return os;
     }
-
-    ~CircularList() {
-        if(head != nullptr) {
-            Node* curr = head;
-            Node* next;
-            while(true) {
-                next = curr -> next;
-                delete curr;
-                curr = next;
-                if(curr == head) {
-                    break;
-                }
-            }
+private:
+    Node* safe_advance(Node* node) {
+        if(node -> next == nullptr) {
+            return head;
+        } else {
+            return node -> next;
         }
     }
-
-private:
     Node* head;
-    Node* tail;
     Node* prec;
 };
 #endif //EIKONAL_CESARONI_TONARELLI_TRABACCHIN_CIRCULARLIST_H

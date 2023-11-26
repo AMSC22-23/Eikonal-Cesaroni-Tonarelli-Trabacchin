@@ -10,7 +10,10 @@
 #include <fstream>
 #include <iostream>
 #include <set>
+#include <math.h>
 #include <algorithm>
+#include <tuple>
+#include <cassert>
 
 template<int D>
 class TriangularMesh {
@@ -33,6 +36,8 @@ public:
             for(int i=0; i<vertices_number*D; i++){
                 mesh_file>>geo[i];
             }
+            std::vector<int> mapping_vector = removeDuplicatedVertices(1e-8);
+            vertices_number = geo.size()/D;
             mesh_file>>buffer;
             int triangle_number;
             mesh_file>>triangle_number;
@@ -45,6 +50,7 @@ public:
                 std::array<int,vertices_per_triangle> tmp;
                 for(int j=0; j<vertices_per_triangle; j++){
                     mesh_file>>tmp[j];
+                    tmp[j] = mapping_vector[tmp[j]];
                 }
                 for(int j=0; j<3; j++){
                     for(int k=0; k<3; k++){
@@ -63,6 +69,7 @@ public:
                     std::vector<int>::iterator end;
                     end = std::set_intersection(sets[i].begin(), sets[i].end(), sets[x].begin(), sets[x].end(), tmp.begin());
                     std::vector<int>::iterator it;
+
                     for(it=tmp.begin(); it!=end; it++){
                         if(*it > x){
                             shapes.push_back(x);
@@ -150,6 +157,54 @@ private:
     std::vector<double> geo;
     std::vector<int> shapes;
     std::vector<int> ngh;
+
+    std::vector<int> removeDuplicatedVertices(double tol) {
+        std::vector<double> reduced_geo;
+        std::vector<int> mapping_vector;
+        mapping_vector.resize(geo.size() / D);
+        int cont = 0;
+        for(int i = 0; i < geo.size(); i += D) {
+            bool found;
+            int idx;
+            std::tie(found, idx) = search_for_equivalent_vertices(reduced_geo, i/D, tol);
+            if(found) {
+                mapping_vector[i/D] = idx;
+            } else {
+                mapping_vector[i/D] = cont;
+                cont++;
+                for(int j = 0; j < D; j++) {
+                    reduced_geo.push_back(geo[i+j]);
+                }
+            }
+        }
+        geo = reduced_geo;
+        return mapping_vector;
+    }
+
+    std::tuple<bool, int> search_for_equivalent_vertices(const std::vector<double>& reduced_geo, int index, double tol) {
+        std::array<double, D> node_to_search;
+        for(int i = 0; i < D; i++) {
+            node_to_search[i] = geo[D*index + i];
+        }
+        for(int i = 0; i < reduced_geo.size(); i+=D) {
+            std::array<double, D> v1;
+            for(int j = 0; j < D; j++) {
+                v1[j] = reduced_geo[i+j];
+            }
+            if(getDist(v1, node_to_search) < tol) {
+                return std::make_tuple(true, i/D);
+            }
+
+        }
+        return std::make_tuple(false, 0);
+    }
+    double getDist(std::array<double, D> v1,std::array<double, D> v2) {
+        double norm = 0;
+        for(int i = 0; i < D; i++) {
+            norm += (v1[i] - v2[i])*(v1[i] - v2[i]);
+        }
+        return sqrt(norm);
+    }
 };
 
 #endif //EIKONAL_CESARONI_TONARELLI_TRABACCHIN_TRIANGLEMESH_H

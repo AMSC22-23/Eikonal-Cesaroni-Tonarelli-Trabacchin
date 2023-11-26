@@ -19,8 +19,8 @@ class TriangularEikonalSolver {
 public:
     TriangularEikonalSolver(TriangularMesh<D>& mesh, std::vector<int>& boundary_vertices) :
             mesh(mesh), boundary_vertices(boundary_vertices) {
-        solutions_out.resize(mesh.getNumberVertices(), DBL_MAX);
-        solutions_in.resize(mesh.getNumberVertices(), DBL_MAX);
+        solutions_out.resize(mesh.getNumberVertices(), 10);
+        solutions_in.resize(mesh.getNumberVertices(), 10);
         for(auto bv : boundary_vertices){
             solutions_out[bv] = 0;
             solutions_in[bv] = 0;
@@ -31,6 +31,7 @@ public:
         for(auto bv : boundary_vertices){
             for(auto neighbor : mesh.getNeighbors(bv)){
                 active_list.add(neighbor);
+                //std::cout << "added init points: " << neighbor << std::endl;
             }
         }
 
@@ -43,30 +44,37 @@ public:
                 std::vector<int> v_neighbours = mesh.getNeighbors(v);
                 for(auto b : v_neighbours) {
                     if(!active_list.isPresent(b)) {
+                        //std::cout << "not present: " << b << std::endl;
                         double old_solution_b = solutions_in[b];
                         double new_solution_b = update(b);
                         if(old_solution_b > new_solution_b) {
                             solutions_in[b] = new_solution_b;
                             active_list.add(b);
+                            //std::cout << "add" << std::endl;
+                            //std::cout << "added: " << b << std::endl;
                         }
                     }
-
+                    else {
+                        //std::cout << "present: " << b << std::endl;
+                    }
                 }
+                active_list.remove();
+                //std::cout << "remove" << std::endl;
+                //std::cout << "removed " << v <<std::endl;
             }
 
 
         }
-
     }
 
     std::vector<double>& getSolutions(){
-        return solutions_out;
+        return solutions_in;
     }
 
 private:
     TriangularMesh<D>& mesh;
     std::vector<int>& boundary_vertices;
-    CircularList<int> active_list;
+    CircularList active_list;
     std::vector<double> solutions_in;
     std::vector<double> solutions_out;
     double velocity = 1;
@@ -115,8 +123,10 @@ private:
         Eikonal::SimplexData<PHDIM> simplex{{p1, p2, p3}, M};
 
         Eikonal::solveEikonalLocalProblem<PHDIM> localSolver{simplex,values};
+
         auto sol = localSolver();
 
+        assert(sol.status == 0);
         return sol.value;
     }
 
