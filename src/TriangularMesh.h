@@ -146,34 +146,36 @@ public:
 
     std::array<double, D> getCoordinates(int vertex){
         std::array<double,D> coord;
-        for(int i = vertex; i < vertex + D; i++){
-            coord[i-vertex] = geo[i];
+        for(int i = D*vertex; i < D*vertex + D; i++){
+            coord[i-D*vertex] = geo[i];
         }
         return coord;
     }
 
 
-private:
+public:
     std::vector<double> geo;
     std::vector<int> shapes;
     std::vector<int> ngh;
 
     std::vector<int> removeDuplicatedVertices(double tol) {
+        for(int i = 0; i < geo.size()/D; i++) {
+            //std::cout << i << " " << geo[D*i] << " " << geo[D*i+1] << std::endl;
+        }
         std::vector<double> reduced_geo;
         std::vector<int> mapping_vector;
         mapping_vector.resize(geo.size() / D);
         int cont = 0;
-        for(int i = 0; i < geo.size(); i += D) {
-            bool found;
-            int idx;
-            std::tie(found, idx) = search_for_equivalent_vertices(reduced_geo, i/D, tol);
+        for(int i = 0; i < mapping_vector.size(); i++) {
+            auto [found, idx] = search_for_equivalent_vertices(reduced_geo, i, tol);
             if(found) {
-                mapping_vector[i/D] = idx;
+                //std::cout << "found duplicated vertex: " << i << std::endl;
+                mapping_vector[i] = idx;
             } else {
-                mapping_vector[i/D] = cont;
+                mapping_vector[i] = cont;
                 cont++;
                 for(int j = 0; j < D; j++) {
-                    reduced_geo.push_back(geo[i+j]);
+                    reduced_geo.push_back(geo[D*i+j]);
                 }
             }
         }
@@ -182,21 +184,17 @@ private:
     }
 
     std::tuple<bool, int> search_for_equivalent_vertices(const std::vector<double>& reduced_geo, int index, double tol) {
-        std::array<double, D> node_to_search;
-        for(int i = 0; i < D; i++) {
-            node_to_search[i] = geo[D*index + i];
-        }
-        for(int i = 0; i < reduced_geo.size(); i+=D) {
+        std::array<double, D> node_to_search = getCoordinates(index);
+        for(int i = 0; i < reduced_geo.size()/D; i++) {
             std::array<double, D> v1;
             for(int j = 0; j < D; j++) {
-                v1[j] = reduced_geo[i+j];
+                v1[j] = reduced_geo[D*i+j];
             }
             if(getDist(v1, node_to_search) < tol) {
-                return std::make_tuple(true, i/D);
+                return {true, i};
             }
-
         }
-        return std::make_tuple(false, 0);
+        return {false, 0};
     }
     double getDist(std::array<double, D> v1,std::array<double, D> v2) {
         double norm = 0;

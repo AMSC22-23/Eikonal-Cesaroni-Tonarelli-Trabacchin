@@ -24,28 +24,40 @@ public:
         return prec -> data;
     }
 
+
+
     void add(int v) {
         Node* newNode = new Node(v);
         if(head == nullptr) {
             newNode -> next = nullptr;
             head = newNode;
             prec = newNode;
+            if(v == 118) {
+                //std::cout << "added1 118" << std::endl;
+            }
         } else {
             if(prec -> next != nullptr) {
                 Node* curr = prec -> next;
                 newNode -> next = curr;
                 prec -> next = newNode;
-                prec = newNode;
+                if(v == 118) {
+                    //std::cout << "added2 118" << std::endl;
+                }
+                //prec = newNode;
             } else {
                 newNode -> next = nullptr;
                 prec -> next = newNode;
-                prec = newNode;
+                if(v == 118) {
+                    //std::cout << "added3 118" << std::endl;
+                }
+                //prec = newNode;
             }
         }
     }
 
     void remove() {
         assert(head != nullptr);
+
         if(head -> next == nullptr) {//the list contains only one element
             delete head;
             head = nullptr;
@@ -74,7 +86,9 @@ public:
     }
 
     bool isPresent(int v) {
-        assert(head != nullptr);
+        if(head == nullptr) {
+            return false;
+        }
         Node* curr = head;
         do {
             if(curr -> data == v) {

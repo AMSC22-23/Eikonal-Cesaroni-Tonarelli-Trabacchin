@@ -8,7 +8,7 @@
 #define eikonal_tol 1e-6
 
 #include "TriangularMesh.h"
-#include "CircularList.h"
+#include "DoubleCircularList.h"
 #include <float.h>
 #include "Phi.hpp"
 #include "../localProblem/include/solveEikonalLocalProblem.hpp"
@@ -31,39 +31,37 @@ public:
         for(auto bv : boundary_vertices){
             for(auto neighbor : mesh.getNeighbors(bv)){
                 active_list.add(neighbor);
-                //std::cout << "added init points: " << neighbor << std::endl;
             }
         }
-
         while(!active_list.isEmpty()){
-            int v = active_list.getNext();
+            std::cout << active_list << std::endl;
+            Node* node = active_list.getNext();
+            int v = node -> data;
             double old_solution = solutions_in[v];
             double new_solution = update(v);
             solutions_in[v] = new_solution;
             if(std::abs(old_solution - new_solution) < eikonal_tol) {
                 std::vector<int> v_neighbours = mesh.getNeighbors(v);
-                for(auto b : v_neighbours) {
-                    if(!active_list.isPresent(b)) {
+                for (auto b: v_neighbours) {
+                    if(b == 119) {
+                        //std::cout << "119 is  a neighbour" << std::endl;
+                    }
+                    if (!active_list.isPresent(b)) {
                         //std::cout << "not present: " << b << std::endl;
                         double old_solution_b = solutions_in[b];
                         double new_solution_b = update(b);
-                        if(old_solution_b > new_solution_b) {
+                        if (old_solution_b > new_solution_b) {
                             solutions_in[b] = new_solution_b;
                             active_list.add(b);
-                            //std::cout << "add" << std::endl;
-                            //std::cout << "added: " << b << std::endl;
+                            if(b == 118) {
+                                //std::cout << "118 added" << std::endl;
+                            }
+
                         }
                     }
-                    else {
-                        //std::cout << "present: " << b << std::endl;
-                    }
                 }
-                active_list.remove();
-                //std::cout << "remove" << std::endl;
-                //std::cout << "removed " << v <<std::endl;
+                active_list.remove(node);
             }
-
-
         }
     }
 
@@ -74,7 +72,7 @@ public:
 private:
     TriangularMesh<D>& mesh;
     std::vector<int>& boundary_vertices;
-    CircularList active_list;
+    DoubleCircularList active_list;
     std::vector<double> solutions_in;
     std::vector<double> solutions_out;
     double velocity = 1;

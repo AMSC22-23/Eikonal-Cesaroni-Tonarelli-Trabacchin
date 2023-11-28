@@ -9,6 +9,7 @@ add_compile_options(-I${mkEigenInc})
 add_compile_definitions(DIMENSION=2)
 
 
+
 add_executable(Eikonal_Cesaroni_Tonarelli_Trabacchin
         test/test_triangularMesh.cpp localProblem/solveEikonalLocalProblem.cpp localProblem/LineSearchSolver.cpp localProblem/DescentDirections.cpp
         localProblem/DescentDirectionFactory.cpp)
