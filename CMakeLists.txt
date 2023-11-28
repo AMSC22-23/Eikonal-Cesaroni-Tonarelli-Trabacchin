@@ -12,4 +12,5 @@ add_compile_definitions(DIMENSION=2)
 
 add_executable(Eikonal_Cesaroni_Tonarelli_Trabacchin
         test/test_triangularMesh.cpp localProblem/solveEikonalLocalProblem.cpp localProblem/LineSearchSolver.cpp localProblem/DescentDirections.cpp
-        localProblem/DescentDirectionFactory.cpp)
+        localProblem/DescentDirectionFactory.cpp
+        src/TetrahedricalMesh.h)

@@ -1,9 +1,9 @@
 //
-// Created by sabri on 23/11/2023.
+// Created by Melanie Tonarelli on 28/11/23.
 //
 
-#ifndef EIKONAL_CESARONI_TONARELLI_TRABACCHIN_TRIANGLEMESH_H
-#define EIKONAL_CESARONI_TONARELLI_TRABACCHIN_TRIANGLEMESH_H
+#ifndef EIKONAL_CESARONI_TONARELLI_TRABACCHIN_TETRAHEDRICALMESH_H
+#define EIKONAL_CESARONI_TONARELLI_TRABACCHIN_TETRAHEDRICALMESH_H
 #include <string>
 #include <array>
 #include <vector>
@@ -16,11 +16,11 @@
 #include <cassert>
 
 template<int D>
-class TriangularMesh {
+class TetrahedricalMesh {
 public:
-    static constexpr int vertices_per_triangle = 3;
+    static constexpr int vertices_per_tetrahedron = 4;
 
-    TriangularMesh(const std::string& mesh_file_path){
+    TetrahedricalMesh(const std::string& mesh_file_path){
         std::ifstream mesh_file (mesh_file_path);
         if(mesh_file.is_open()) {
             std::string buffer;
@@ -47,13 +47,13 @@ public:
             ngh.resize(vertices_number);
             for(int i=0; i<triangle_number; i++){
                 mesh_file>>buffer;
-                std::array<int,vertices_per_triangle> tmp;
-                for(int j=0; j<vertices_per_triangle; j++){
+                std::array<int,vertices_per_tetrahedron> tmp;
+                for(int j=0; j<vertices_per_tetrahedron; j++){
                     mesh_file>>tmp[j];
                     tmp[j] = mapping_vector[tmp[j]];
                 }
-                for(int j=0; j < vertices_per_triangle; j++){
-                    for(int k=0; k < vertices_per_triangle; k++){
+                for(int j=0; j< vertices_per_tetrahedron; j++){
+                    for(int k=0; k< vertices_per_tetrahedron; k++){
                         if(j!=k){
                             sets[tmp[j]].insert(tmp[k]);
                         }
@@ -67,14 +67,32 @@ public:
                 for(const auto& x: sets[i]){
                     std::vector<int> tmp (std::min(sets[i].size(), sets[x].size() ), 0);
                     std::vector<int>::iterator end;
-                    end = std::set_intersection(sets[i].begin(), sets[i].end(), sets[x].begin(), sets[x].end(), tmp.begin());
+                    end = std::set_intersection(sets[i].begin(), sets[i].end(),
+                                                sets[x].begin(), sets[x].end(), tmp.begin());
                     std::vector<int>::iterator it;
+                    std::set<int> current_set;
 
                     for(it=tmp.begin(); it!=end; it++){
-                        if(*it > x){
-                            shapes.push_back(x);
-                            shapes.push_back(*it);
-                            cont += vertices_per_triangle - 1;
+                        current_set.insert(*it);
+                    }
+
+                    for(it = tmp.begin(); it != end; it++){
+                        if(*it > x) {
+                            std::vector<int>::iterator end2;
+                            std::vector<int> tmp2(std::min(current_set.size(), sets[*it].size()), 0);
+                            std::vector<int>::iterator it2;
+                            end2 = std::set_intersection(current_set.begin(), current_set.end(),
+                                                         sets[*it].begin(), sets[*it].end(),
+                                                         tmp2.begin());
+                            for(it2 = tmp2.begin(); it2 != end2; it2++){
+                                if(*it2 > *it){
+                                    shapes.push_back(x);
+                                    shapes.push_back(*it);
+                                    shapes.push_back(*it2);
+                                    cont += vertices_per_tetrahedron - 1;
+                                }
+                            }
+
                         }
                     }
                 }
@@ -89,19 +107,19 @@ public:
         int cont = 0;
         int index = 0;
         std::string res = "";
-       while(true) {
-           res+= "vertex " + std::to_string(cont) + ": " ;
-           for(int i=index; i< (cont < ngh.size()-1 ? ngh[cont+1] : shapes.size()); i+= vertices_per_triangle - 1){
-               res+=std::to_string(shapes[i]) + " " + std::to_string (shapes[i+1]) + ", ";
-               index = i + vertices_per_triangle - 1;
-           }
-           cont++;
-           if(cont==ngh.size()){
-               break;
-           }
-           res += "\n";
-       }
-       return res;
+        while(true) {
+            res+= "vertex " + std::to_string(cont) + ": " ;
+            for(int i=index; i< (cont < ngh.size()-1 ? ngh[cont+1] : shapes.size()); i+= vertices_per_tetrahedron - 1){
+                res+=std::to_string(shapes[i]) + " " + std::to_string (shapes[i+1]) + ", ";
+                index = i + vertices_per_tetrahedron - 1;
+            }
+            cont++;
+            if(cont==ngh.size()){
+                break;
+            }
+            res += "\n";
+        }
+        return res;
     }
 
     int getNumberVertices() const{
@@ -186,5 +204,4 @@ public:
         return sqrt(norm);
     }
 };
-
-#endif //EIKONAL_CESARONI_TONARELLI_TRABACCHIN_TRIANGLEMESH_H
+#endif //EIKONAL_CESARONI_TONARELLI_TRABACCHIN_TETRAHEDRICALMESH_H
