@@ -21,7 +21,7 @@ int main(){
     for(int i = 0; i < solver.getSolutions().size();i++) {
         std::cout << i << " " <<"(" << mesh.getCoordinates(i)[0] << ", " << mesh.getCoordinates(i)[1] << ")"  << " " << solver.getSolutions()[i] << " " << sqrt(mesh.getCoordinates(i)[0]*mesh.getCoordinates(i)[0] + mesh.getCoordinates(i)[1]*mesh.getCoordinates(i)[1])   << std::endl;\
     }
-    std::cout << mesh.toString_alt() << std::endl;
+    //std::cout << mesh.toString_alt() << std::endl;
 
 
 

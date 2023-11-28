@@ -19,8 +19,8 @@ class TriangularEikonalSolver {
 public:
     TriangularEikonalSolver(TriangularMesh<D>& mesh, std::vector<int>& boundary_vertices) :
             mesh(mesh), boundary_vertices(boundary_vertices) {
-        solutions_out.resize(mesh.getNumberVertices(), 10);
-        solutions_in.resize(mesh.getNumberVertices(), 10);
+        solutions_out.resize(mesh.getNumberVertices(), 1000);
+        solutions_in.resize(mesh.getNumberVertices(), 1000);
         for(auto bv : boundary_vertices){
             solutions_out[bv] = 0;
             solutions_in[bv] = 0;
@@ -34,7 +34,7 @@ public:
             }
         }
         while(!active_list.isEmpty()){
-            std::cout << active_list << std::endl;
+            //std::cout << active_list << std::endl;
             Node* node = active_list.getNext();
             int v = node -> data;
             double old_solution = solutions_in[v];
