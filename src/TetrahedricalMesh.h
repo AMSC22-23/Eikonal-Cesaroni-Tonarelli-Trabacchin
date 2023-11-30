@@ -14,6 +14,7 @@
 #include <algorithm>
 #include <tuple>
 #include <cassert>
+#include <numeric>
 
 template<int D>
 class TetrahedricalMesh {
@@ -181,6 +182,57 @@ public:
         geo = reduced_geo;
         return mapping_vector;
     }
+
+    std::vector<int> removeDuplicateVertices_efficient(double tol){
+        std::vector<int> pos;
+        pos.resize(geo.size()/D);
+        std::iota(pos.begin(), pos.end(),0);
+        std::sort(pos.begin(), pos.end(), [&](std::size_t i, std::size_t j) { return verticesCompare(i,j)!=-1; });
+        int current_index = 1;
+        int prec = 0;
+        std::vector<int> same;
+        std::vector<int> mapping_vector;
+        std::vector<double> reduced_geo;
+        mapping_vector.resize(geo.size()/D);
+        while(true){
+
+            same.push_back(pos[prec]);
+
+            while(true){
+                if( current_index<pos.size() && (pos[prec], pos[current_index]) == 0){
+                    same.push_back(pos[current_index]);
+                    current_index++;
+                } else{
+                    for(int j : same){
+                        mapping_vector[j]=reduced_geo.size();
+                    }
+                    for(int i=0; i<D; i++){
+                        reduced_geo.push_back(geo[same[0]*D+i]);
+                    }
+
+                    break;
+                }
+
+            }
+            if(current_index >= pos.size()){
+                break;
+            }
+            prec=current_index;
+            current_index++;
+        }
+    }
+
+    int verticesCompare(int i, int j){
+        for(int k=0; k<D; k++){
+            if(geo[D*i+k] < geo[D*j+k]){
+                return 1;
+            } else if (geo[D*i+k] > geo[D*j+k]){
+                return -1;
+            }
+        }
+        return 0;
+    }
+
 
     std::tuple<bool, int> search_for_equivalent_vertices(const std::vector<double>& reduced_geo, int index, double tol) {
         std::array<double, D> node_to_search = getCoordinates(index);

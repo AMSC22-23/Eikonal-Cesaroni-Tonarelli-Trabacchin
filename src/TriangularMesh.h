@@ -14,13 +14,14 @@
 #include <algorithm>
 #include <tuple>
 #include <cassert>
+#include <numeric>
 
 template<int D>
 class TriangularMesh {
 public:
     static constexpr int vertices_per_triangle = 3;
 
-    TriangularMesh(const std::string& mesh_file_path){
+    TriangularMesh(const std::string& mesh_file_path, int n){
         std::ifstream mesh_file (mesh_file_path);
         if(mesh_file.is_open()) {
             std::string buffer;
@@ -36,7 +37,20 @@ public:
             for(int i=0; i<vertices_number*D; i++){
                 mesh_file>>geo[i];
             }
-            std::vector<int> mapping_vector = removeDuplicatedVertices(1e-8);
+            std::vector<int> mapping_vector;
+            if(n==1){
+                mapping_vector = removeDuplicatedVertices(1e-8);
+            } else {
+                mapping_vector = removeDuplicateVertices_efficient(1e-8);
+            }
+            /**
+             * debug
+             */
+             std::cout << "mapping: " << std::endl;
+             for(int i = 0 ; i < mapping_vector.size(); i++) {
+                 std::cout << mapping_vector[i] << " ";
+             }
+             std::cout << std::endl;
             vertices_number = geo.size()/D;
             mesh_file>>buffer;
             int triangle_number;
@@ -162,6 +176,59 @@ public:
         }
         geo = reduced_geo;
         return mapping_vector;
+    }
+
+    std::vector<int> removeDuplicateVertices_efficient(double tol){
+        std::vector<int> pos;
+        pos.resize(geo.size()/D);
+        std::iota(pos.begin(), pos.end(),0);
+        std::sort(pos.begin(), pos.end(), [&](std::size_t i, std::size_t j) { return verticesCompare(i,j)!=-1; });
+        int current_index = 1;
+        int prec = 0;
+        std::vector<int> same;
+        std::vector<int> mapping_vector;
+        std::vector<double> reduced_geo;
+        reduced_geo.resize(0);
+        mapping_vector.resize(geo.size()/D);
+        while(true){
+
+            same.push_back(pos[prec]);
+
+            while(true){
+                if( current_index<pos.size() && (pos[prec], pos[current_index]) == 0){
+                    same.push_back(pos[current_index]);
+                    current_index++;
+                } else{
+                    for(int j : same){
+                        mapping_vector[j]=(int)reduced_geo.size()/D;
+                    }
+                    for(int i=0; i<D; i++){
+                        reduced_geo.push_back(geo[same[0]*D+i]);
+                    }
+                    break;
+                }
+
+            }
+            if(current_index >= pos.size()){
+                break;
+            }
+            same.clear();
+            prec=current_index;
+            current_index++;
+        }
+        geo = reduced_geo;
+        return mapping_vector;
+    }
+
+    int verticesCompare(int i, int j){
+        for(int k=0; k<D; k++){
+            if(geo[D*i+k] < geo[D*j+k]){
+                return 1;
+            } else if (geo[D*i+k] > geo[D*j+k]){
+                return -1;
+            }
+        }
+        return 0;
     }
 
     std::tuple<bool, int> search_for_equivalent_vertices(const std::vector<double>& reduced_geo, int index, double tol) {
