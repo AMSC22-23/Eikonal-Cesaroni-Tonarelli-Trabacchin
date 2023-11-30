@@ -195,31 +195,30 @@ public:
         std::vector<double> reduced_geo;
         mapping_vector.resize(geo.size()/D);
         while(true){
-
             same.push_back(pos[prec]);
-
             while(true){
-                if( current_index<pos.size() && (pos[prec], pos[current_index]) == 0){
+                if( current_index<pos.size() && verticesCompare(pos[prec], pos[current_index]) == 0){
                     same.push_back(pos[current_index]);
                     current_index++;
                 } else{
                     for(int j : same){
-                        mapping_vector[j]=reduced_geo.size();
+                        mapping_vector[j]=(int)reduced_geo.size();
                     }
                     for(int i=0; i<D; i++){
                         reduced_geo.push_back(geo[same[0]*D+i]);
                     }
-
                     break;
                 }
-
             }
             if(current_index >= pos.size()){
                 break;
             }
+            same.clear();
             prec=current_index;
             current_index++;
         }
+        geo = reduced_geo;
+        return mapping_vector;
     }
 
     int verticesCompare(int i, int j){

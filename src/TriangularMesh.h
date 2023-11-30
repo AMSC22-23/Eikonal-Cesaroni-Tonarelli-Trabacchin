@@ -183,6 +183,14 @@ public:
         pos.resize(geo.size()/D);
         std::iota(pos.begin(), pos.end(),0);
         std::sort(pos.begin(), pos.end(), [&](std::size_t i, std::size_t j) { return verticesCompare(i,j)!=-1; });
+
+        //debug
+        std::cout << "sorted pos = ";
+        for(int i = 0; i < pos.size(); i++){
+            std::cout << pos[i] << " ";
+        }
+        std::cout << std::endl;
+
         int current_index = 1;
         int prec = 0;
         std::vector<int> same;
@@ -191,11 +199,9 @@ public:
         reduced_geo.resize(0);
         mapping_vector.resize(geo.size()/D);
         while(true){
-
             same.push_back(pos[prec]);
-
             while(true){
-                if( current_index<pos.size() && (pos[prec], pos[current_index]) == 0){
+                if( current_index < pos.size() && verticesCompare(pos[prec], pos[current_index]) == 0){
                     same.push_back(pos[current_index]);
                     current_index++;
                 } else{
@@ -207,7 +213,6 @@ public:
                     }
                     break;
                 }
-
             }
             if(current_index >= pos.size()){
                 break;
