@@ -4,7 +4,7 @@
 
 #ifndef EIKONAL_CESARONI_TONARELLI_TRABACCHIN_TETRAHEDRICALEIKONALSOLVER_H
 #define EIKONAL_CESARONI_TONARELLI_TRABACCHIN_TETRAHEDRICALEIKONALSOLVER_H
-#define eikonal_tol 1e-6
+#define eikonal_tol 1e-10
 #include "TetrahedricalMesh.h"
 #include "DoubleCircularList.h"
 #include <float.h>
@@ -26,23 +26,23 @@ public:
     };
 
     void solve(){
+        int count = 0;
         for(auto bv : boundary_vertices){
             for(auto neighbor : mesh.getNeighbors(bv)){
                 active_list.add(neighbor);
             }
         }
         while(!active_list.isEmpty()){
-            //std::cout << active_list << std::endl;
             Node* node = active_list.getNext();
             int v = node -> data;
             double old_solution = solutions_in[v];
             double new_solution = update(v);
             solutions_in[v] = new_solution;
+
             if(std::abs(old_solution - new_solution) < eikonal_tol) {
                 std::vector<int> v_neighbours = mesh.getNeighbors(v);
                 for (auto b: v_neighbours) {
                     if (!active_list.isPresent(b)) {
-                        //std::cout << "not present: " << b << std::endl;
                         double old_solution_b = solutions_in[b];
                         double new_solution_b = update(b);
                         if (old_solution_b > new_solution_b) {

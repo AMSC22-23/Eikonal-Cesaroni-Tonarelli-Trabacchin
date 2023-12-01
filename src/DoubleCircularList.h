@@ -27,6 +27,7 @@ public:
 
     void add(int v) {
         Node* newNode = new Node(v);
+        present.insert(v);
         if(head == nullptr) {
             head = newNode,
             head -> prec = nullptr;
@@ -41,6 +42,7 @@ public:
     }
 
     void remove(Node* nodeToRemove) {
+        present.erase(nodeToRemove->data);
         if(nodeToRemove == curr) {
             curr = curr -> next;
         }
@@ -63,7 +65,7 @@ public:
     }
 
     bool isPresent(int v) {
-        if(head == nullptr) {
+       /* if(head == nullptr) {
             return false;
         }
         Node* pNode = head;
@@ -74,7 +76,8 @@ public:
                 pNode = pNode -> next;
             }
         }while(pNode != nullptr);
-        return false;
+        return false;*/
+       return present.find(v) != present.end();
     }
 
     friend std::ostream& operator<<(std::ostream& os, const DoubleCircularList& other) {
@@ -87,6 +90,7 @@ public:
         os << std::endl;
         return os;
     }
+
 private:
     Node* safe_advance(Node* node) {
         if(node -> next == nullptr) {
@@ -97,5 +101,6 @@ private:
     }
     Node* head;
     Node* curr;
+    std::set<int> present;
 };
 #endif //EIKONAL_CESARONI_TONARELLI_TRABACCHIN_DOUBLECIRCULARLIST_H

@@ -20,10 +20,10 @@ int main1(){
 //    //for(int i = 0; i < mesh.geo.size(); i+=2) {
 //        //std::cout << mesh.geo[i] << " " << mesh.geo[i+1] << std::endl;
 //    //}
-    solver.solve();
-    for(int i = 0; i < solver.getSolutions().size();i++) {
-        std::cout << i << " " <<"(" << mesh1.getCoordinates(i)[0] << ", " << mesh1.getCoordinates(i)[1] << ")"  << " " << solver.getSolutions()[i] << " " << sqrt(mesh1.getCoordinates(i)[0]*mesh1.getCoordinates(i)[0] + mesh1.getCoordinates(i)[1]*mesh1.getCoordinates(i)[1])   << std::endl;\
-    }
+ //   //solver.solve();
+   // for(int i = 0; i < solver.getSolutions().size();i++) {
+     //   std::cout << i << " " <<"(" << mesh1.getCoordinates(i)[0] << ", " << mesh1.getCoordinates(i)[1] << ")"  << " " << solver.getSolutions()[i] << " " << sqrt(mesh1.getCoordinates(i)[0]*mesh1.getCoordinates(i)[0] + mesh1.getCoordinates(i)[1]*mesh1.getCoordinates(i)[1])   << std::endl;\
+    //}
 
 
 
