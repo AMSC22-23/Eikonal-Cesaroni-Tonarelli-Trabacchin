@@ -6,7 +6,7 @@
 #include <array>
 #include <iostream>
 
-int main(){
+int main1(){
     // We create a Circular list with (1,1) - (2,2) - (3,3) - (4,4) - (5,5) with vertices of size 2
     CircularList list;
     assert(list.isEmpty());

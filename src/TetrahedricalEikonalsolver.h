@@ -70,7 +70,7 @@ private:
     double velocity = 1;
 
     double update(int vertex) {
-        std::vector<int> triangles = mesh.getTriangles(vertex);
+        std::vector<int> triangles = mesh.getShapes(vertex);
         std::vector<double> solutions;
         solutions.resize(triangles.size() / 3, DBL_MAX);
         for(int i = 0; i < triangles.size(); i += 3){

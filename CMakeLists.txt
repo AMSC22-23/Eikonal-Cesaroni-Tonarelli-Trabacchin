@@ -12,7 +12,7 @@ add_compile_definitions(DIMENSION=3)
 
 
 add_executable(Eikonal_Cesaroni_Tonarelli_Trabacchin
-        test/test_triangularMesh.cpp localProblem/solveEikonalLocalProblem.cpp localProblem/LineSearchSolver.cpp localProblem/DescentDirections.cpp
+        localProblem/solveEikonalLocalProblem.cpp localProblem/LineSearchSolver.cpp localProblem/DescentDirections.cpp
         localProblem/DescentDirectionFactory.cpp test/test_tetrahedricalMesh.cpp
         src/TetrahedricalMesh.h)
 set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3")

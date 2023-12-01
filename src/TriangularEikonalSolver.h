@@ -43,20 +43,12 @@ public:
             if(std::abs(old_solution - new_solution) < eikonal_tol) {
                 std::vector<int> v_neighbours = mesh.getNeighbors(v);
                 for (auto b: v_neighbours) {
-                    if(b == 119) {
-                        //std::cout << "119 is  a neighbour" << std::endl;
-                    }
                     if (!active_list.isPresent(b)) {
-                        //std::cout << "not present: " << b << std::endl;
                         double old_solution_b = solutions_in[b];
                         double new_solution_b = update(b);
                         if (old_solution_b > new_solution_b) {
                             solutions_in[b] = new_solution_b;
                             active_list.add(b);
-                            if(b == 118) {
-                                //std::cout << "118 added" << std::endl;
-                            }
-
                         }
                     }
                 }
@@ -78,7 +70,7 @@ private:
     double velocity = 1;
 
     double update(int vertex) {
-        std::vector<int> triangles = mesh.getTriangles(vertex);
+        std::vector<int> triangles = mesh.getShapes(vertex);
         std::vector<double> solutions;
         solutions.resize(triangles.size() / 2, DBL_MAX);
         for(int i = 0; i < triangles.size(); i += 2){
@@ -96,8 +88,6 @@ private:
         }
 
         double min = *std::min_element(solutions.begin(), solutions.end());
-        //solutions_out[vertex] = min;
-        //solutions_in[vertex] = min;
         return min;
     }
 
