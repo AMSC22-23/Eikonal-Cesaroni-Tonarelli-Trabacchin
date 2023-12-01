@@ -43,14 +43,7 @@ public:
             } else {
                 mapping_vector = removeDuplicateVertices_efficient(1e-8);
             }
-            /**
-             * debug
-             */
-             std::cout << "mapping: " << std::endl;
-             for(int i = 0 ; i < mapping_vector.size(); i++) {
-                 std::cout << mapping_vector[i] << " ";
-             }
-             std::cout << std::endl;
+
             vertices_number = geo.size()/D;
             mesh_file>>buffer;
             int triangle_number;
@@ -154,9 +147,6 @@ public:
     std::vector<int> ngh;
 
     std::vector<int> removeDuplicatedVertices(double tol) {
-        for(int i = 0; i < geo.size()/D; i++) {
-            //std::cout << i << " " << geo[D*i] << " " << geo[D*i+1] << std::endl;
-        }
         std::vector<double> reduced_geo;
         std::vector<int> mapping_vector;
         mapping_vector.resize(geo.size() / D);
@@ -184,21 +174,17 @@ public:
         std::iota(pos.begin(), pos.end(),0);
         std::sort(pos.begin(), pos.end(), [&](std::size_t i, std::size_t j) { return verticesCompare(i,j)!=-1; });
 
-        //debug
-        std::cout << "sorted pos = ";
-        for(int i = 0; i < pos.size(); i++){
-            std::cout << pos[i] << " ";
-        }
-        std::cout << std::endl;
-
-        int current_index = 1;
-        int prec = 0;
+        int current_index = 0;
+        int prec;
         std::vector<int> same;
         std::vector<int> mapping_vector;
         std::vector<double> reduced_geo;
         reduced_geo.resize(0);
         mapping_vector.resize(geo.size()/D);
-        while(true){
+
+        while(current_index < pos.size()){
+            prec=current_index;
+            current_index++;
             same.push_back(pos[prec]);
             while(true){
                 if( current_index < pos.size() && verticesCompare(pos[prec], pos[current_index]) == 0){
@@ -214,12 +200,7 @@ public:
                     break;
                 }
             }
-            if(current_index >= pos.size()){
-                break;
-            }
             same.clear();
-            prec=current_index;
-            current_index++;
         }
         geo = reduced_geo;
         return mapping_vector;
