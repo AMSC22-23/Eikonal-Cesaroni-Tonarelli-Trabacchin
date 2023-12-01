@@ -37,7 +37,7 @@ public:
             for(int i=0; i<vertices_number*D; i++){
                 mesh_file>>geo[i];
             }
-            std::vector<int> mapping_vector = removeDuplicatedVertices(1e-8);
+            std::vector<int> mapping_vector = removeDuplicatedVertices_efficient(1e-8);
             vertices_number = geo.size()/D;
             mesh_file>>buffer;
             int triangle_number;
@@ -183,7 +183,7 @@ public:
         return mapping_vector;
     }
 
-    std::vector<int> removeDuplicateVertices_efficient(double tol){
+    std::vector<int> removeDuplicatedVertices_efficient(double tol){
         std::vector<int> pos;
         pos.resize(geo.size()/D);
         std::iota(pos.begin(), pos.end(),0);
@@ -202,7 +202,7 @@ public:
                     current_index++;
                 } else{
                     for(int j : same){
-                        mapping_vector[j]=(int)reduced_geo.size();
+                        mapping_vector[j]=(int)reduced_geo.size()/D;
                     }
                     for(int i=0; i<D; i++){
                         reduced_geo.push_back(geo[same[0]*D+i]);
