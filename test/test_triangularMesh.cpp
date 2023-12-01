@@ -8,7 +8,7 @@
 #include <cmath>
 
 int main(){
-    std::string fileName = "../test/triangular_mesh_test.vtx";
+    std::string fileName = "../test/triangular_mesh_test.vtk";
     //TriangularMesh<2> mesh (fileName,1);
     TriangularMesh<2> mesh1 (fileName,2);
     //std::cout<<mesh.toString() << std::endl;
