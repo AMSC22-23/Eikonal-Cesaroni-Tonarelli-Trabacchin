@@ -72,7 +72,7 @@ protected:
         std::vector<int> pos;
         pos.resize(geo.size()/D);
         std::iota(pos.begin(), pos.end(),0);
-        std::sort(pos.begin(), pos.end(), [&](std::size_t i, std::size_t j) {assert(i < pos.size() && j < pos.size()); return verticesCompare(i,j)==1; });
+        std::sort(pos.begin(), pos.end(), [&](std::size_t i, std::size_t j) { return verticesCompare(i,j) == 1; });
 
         int current_index = 0;
         int prec;
