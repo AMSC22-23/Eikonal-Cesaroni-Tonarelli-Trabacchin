@@ -6,18 +6,18 @@
 #include <iostream>
 #include "../src/TetrahedricalMesh.h"
 #include <cmath>
-#include "../src/TetrahedricalEikonalsolver.h"
+#include "../src/Eikonalsolver.h"
 #include <ctime>
 #include <chrono>
 
 int main(){
-    std::string fileName = "../test/output-mesh-cube-5.vtk";
+    std::string fileName = "../test/output-mesh-cube-40.vtk";
     TetrahedricalMesh<3> mesh (fileName);
 
 
     std::vector<int> boundary;
     boundary.push_back(0);
-    TetrahedricalEikonalSolver<3> solver (mesh, boundary);
+    EikonalSolver<3,4> solver (mesh, boundary);
 
     time_t start = time(0);
     auto start1 = std::chrono::high_resolution_clock::now();

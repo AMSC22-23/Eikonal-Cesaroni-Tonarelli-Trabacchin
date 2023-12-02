@@ -25,8 +25,8 @@ public:
         std::vector<std::set<int>> sets = Mesh<D>::init_mesh(mesh_file_path, 3);
 
         int cont = 0;
-        for(int i=0; i < Mesh<D>::getNumberVertices(); i++) {
-            Mesh<D>::ngh[i] = cont;
+        for(int i=0; i < this->getNumberVertices(); i++) {
+            this->ngh[i] = cont;
             for (const auto &x: sets[i]) {
                 std::vector<int> tmp(std::min(sets[i].size(), sets[x].size()), 0);
                 std::vector<int>::iterator end;
@@ -37,14 +37,16 @@ public:
 
                 for (it = tmp.begin(); it != end; it++) {
                     if (*it > x) {
-                        Mesh<D>::shapes.push_back(x);
-                        Mesh<D>::shapes.push_back(*it);
-                        cont += Mesh<D>::vertices_per_shape - 1;
+                        this->shapes.push_back(x);
+                        this->shapes.push_back(*it);
+                        cont += this->vertices_per_shape - 1;
                     }
                 }
             }
         }
     }
+
+
 
 };
 

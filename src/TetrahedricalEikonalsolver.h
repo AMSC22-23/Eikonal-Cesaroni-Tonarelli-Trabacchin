@@ -7,6 +7,7 @@
 #define eikonal_tol 1e-10
 #include "TetrahedricalMesh.h"
 #include "DoubleCircularList.h"
+#define DIMENSION 3
 #include <float.h>
 #include "Phi.hpp"
 #include "../localProblem/include/solveEikonalLocalProblem.hpp"

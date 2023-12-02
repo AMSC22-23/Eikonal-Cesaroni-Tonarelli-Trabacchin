@@ -4,17 +4,17 @@
 #include <string>
 #include <iostream>
 #include "../src/TriangularMesh.h"
-#include "TriangularEikonalSolver.h"
+#include "EikonalSolver.h"
 #include <cmath>
 
 int main1(){
     const std::string fileName = "../test/triangular_mesh_test.vtk";
     TriangularMesh<2> mesh (fileName);
-    std::cout<<mesh.toString() << std::endl;
+    //std::cout<<mesh.toString() << std::endl;
 
     std::vector<int> boundary;
     boundary.push_back(0);
-    TriangularEikonalSolver<2> solver(mesh, boundary);
+    EikonalSolver<2,3> solver(mesh, boundary);
     solver.solve();
     for(int i = 0; i < solver.getSolutions().size();i++) {
         std::cout << i << " " <<"(" << mesh.getCoordinates(i)[0] << ", " << mesh.getCoordinates(i)[1]

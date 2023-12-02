@@ -37,8 +37,12 @@ public:
         return res;
     }
 
-    int getNumberVertices() const{
+    int getNumberVertices() const {
         return geo.size() / D;
+    };
+
+    int getVerticesPerShape() const {
+        return vertices_per_shape;
     }
 
     std::vector<int> getNeighbors(int vertex){

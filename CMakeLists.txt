@@ -6,7 +6,6 @@ include_directories(src)
 include_directories("/u/sw/toolchains/gcc-glibc/11.2.0/pkgs/eigen/3.3.9/include/eigen3")
 include_directories("localProblem/include")
 add_compile_options(-I${mkEigenInc})
-add_compile_definitions(DIMENSION=3)
 
 
 
@@ -14,5 +13,5 @@ add_compile_definitions(DIMENSION=3)
 add_executable(Eikonal_Cesaroni_Tonarelli_Trabacchin
         localProblem/solveEikonalLocalProblem.cpp localProblem/LineSearchSolver.cpp localProblem/DescentDirections.cpp
         localProblem/DescentDirectionFactory.cpp test/test_tetrahedricalMesh.cpp
-        src/TetrahedricalMesh.h)
+        src/TetrahedricalMesh.h src/EikonalSolver.h src/TetrahedricalEikonalSolver.h test/test_triangularMesh.cpp test/test_triangulatedMesh.cpp)
 set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3")
