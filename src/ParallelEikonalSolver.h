@@ -58,18 +58,22 @@ private:
         while(!local_list.isEmpty()){
             Node* node = local_list.getNext();
             int v = node -> data;
-            double old_solution = solutions_in[v];
+            double old_solution = get_solution(v, vertex_to_solution);
             double new_solution = update(v);
-            solutions_in[v] = new_solution;
+            solutions[p_out*solutions.size()/2+v] = new_solution;
+            //write in map
+            vertex_to_solution.insert(std::pair<int, double> (v, new_solution));
 
             if(std::abs(old_solution - new_solution) < eikonal_tol) {
                 std::vector<int> v_neighbours = mesh.getNeighbors(v);
                 for (auto b: v_neighbours) {
                     if (!local_list.isPresent(b)) {
-                        double old_solution_b = solutions_in[b];
+                        double old_solution_b = get_solution(v, vertex_to_solution);
                         double new_solution_b = update(b);
                         if (old_solution_b > new_solution_b) {
-                            solutions_in[b] = new_solution_b;
+                            solutions[p_out*solutions.size()/2+b] = new_solution_b;
+                            // write in map
+                            vertex_to_solution.insert(std::pair<int, double> (b, new_solution_b));
                             local_list.add(b);
                         }
                     }
@@ -125,7 +129,7 @@ private:
             coordinates[number_of_vertices - 1] = mesh.getCoordinates(vertex);
 
             for(int j = 0; j < number_of_vertices - 1; j++) {
-                solutions_base[j] = solutions_in[triangles[i + j]];
+                solutions_base[j] = get_solution(triangles[i + j]);
             }
             solutions.push_back(solveLocalProblem(coordinates, solutions_base));
         }

@@ -13,5 +13,6 @@ add_compile_options(-I${mkEigenInc})
 add_executable(Eikonal_Cesaroni_Tonarelli_Trabacchin
         localProblem/solveEikonalLocalProblem.cpp localProblem/LineSearchSolver.cpp localProblem/DescentDirections.cpp
         localProblem/DescentDirectionFactory.cpp test/test_tetrahedricalMesh.cpp
-        src/TetrahedricalMesh.h src/EikonalSolver.h src/TetrahedricalEikonalSolver.h test/test_triangularMesh.cpp test/test_triangulatedMesh.cpp)
+        src/TetrahedricalMesh.h src/EikonalSolver.h src/TetrahedricalEikonalSolver.h test/test_triangularMesh.cpp test/test_triangulatedMesh.cpp
+        src/ParallelEikonalSolver.h)
 set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3")
