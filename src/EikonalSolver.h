@@ -4,7 +4,7 @@
 
 #ifndef EIKONAL_CESARONI_TONARELLI_TRABACCHIN_EIKONALSOLVER_H
 #define EIKONAL_CESARONI_TONARELLI_TRABACCHIN_EIKONALSOLVER_H
-#define eikonal_tol 1e-6
+#define eikonal_tol 1e-8
 
 #include "Mesh.h"
 #include "DoubleCircularList.h"
@@ -23,7 +23,9 @@ public:
             solutions_out[bv] = 0;
             solutions_in[bv] = 0;
         }
-    };
+    }
+
+
 
     void solve(){
         int count = 0;
@@ -48,7 +50,6 @@ public:
                         if (old_solution_b > new_solution_b) {
                             solutions_in[b] = new_solution_b;
                             active_list.add(b);
-
                         }
                     }
                 }
