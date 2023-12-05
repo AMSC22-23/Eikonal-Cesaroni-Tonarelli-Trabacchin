@@ -15,4 +15,6 @@ add_executable(Eikonal_Cesaroni_Tonarelli_Trabacchin
         localProblem/DescentDirectionFactory.cpp test/test_tetrahedricalMesh.cpp
         src/TetrahedricalMesh.h src/EikonalSolver.h src/TetrahedricalEikonalSolver.h test/test_triangularMesh.cpp test/test_triangulatedMesh.cpp
         src/ParallelEikonalSolver.h)
+target_link_libraries(Eikonal_Cesaroni_Tonarelli_Trabacchin PRIVATE OpenMP::OpenMP_CXX)
+set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fopenmp")
 set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3")

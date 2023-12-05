@@ -27,8 +27,61 @@ public:
         for(auto bv : boundary_vertices){
             active_list.push_back(bv);
         }
+        #pragma omp parallel default(none) shared(std::cout) num_threads(threads_number)
+        {
 
+            std::map<int,double> vertex_to_solution;
+            DoubleCircularList local_list;
 
+            int thread_id = omp_get_thread_num();
+
+            while(!active_list.empty()) {
+                if(thread_id == 0) {
+                    std::cout << active_list.size() << std::endl;
+                }
+                //std::cout << "thread " << thread_id << " is alive" << std::endl;
+
+                for(int i=thread_id; i<active_list.size(); i+=threads_number){
+                    local_list.add(active_list[i]);
+                }
+                #pragma omp barrier
+                if(thread_id == 0) {
+                    active_list.clear();
+                }
+                #pragma omp barrier
+                while (!local_list.isEmpty()) {
+                    //std::cout << "thread " << thread_id << " is alive" << std::endl;
+                    Node *node = local_list.getNext();
+                    int v = node->data;
+                    double old_solution = get_solution(v, vertex_to_solution);
+                    double new_solution = update(v, vertex_to_solution);
+                    solutions[p_out * solutions.size() / 2 + v] = new_solution;
+                    vertex_to_solution.insert(std::pair<int, double>(v, new_solution));
+
+                    if (std::abs(old_solution - new_solution) < eikonal_tol) {
+                        std::vector<int> v_neighbours = mesh.getNeighbors(v);
+                        for (auto b: v_neighbours) {
+                            if (!local_list.isPresent(b)) {
+                                double old_solution_b = get_solution(v, vertex_to_solution);
+                                double new_solution_b = update(b, vertex_to_solution);
+                                if (old_solution_b > new_solution_b) {
+                                    solutions[p_out * solutions.size() / 2 + b] = new_solution_b;
+                                    vertex_to_solution.insert(std::pair<int, double>(b, new_solution_b));
+                                    #pragma omp critical(active)
+                                    {
+                                        std::cout << "added to active" << std::endl;
+                                        active_list.push_back(b);
+                                    }
+                                }
+                            }
+                        }
+                        local_list.remove(node);
+                    }
+                }
+                #pragma omp barrier
+                p_out = (p_out + 1) % 2;
+            }
+        }
     }
 private:
     Mesh<D>& mesh;
@@ -41,7 +94,7 @@ private:
 
     double get_solution(int vertex, const std::map<int, double>& vertex_to_solution){
         auto it = vertex_to_solution.find(vertex);
-        if(it != vertex_to_solution.end()){
+        if(it != vertex_to_solution.end() && false){
             return it->second;
         } else {
             return solutions[(p_out==1 ? 0 : 1)*solutions.size()/2+vertex];
@@ -74,7 +127,7 @@ private:
                             solutions[p_out*solutions.size()/2+b] = new_solution_b;
                             // write in map
                             vertex_to_solution.insert(std::pair<int, double> (b, new_solution_b));
-                            local_list.add(b);
+                            active_list;
                         }
                     }
                 }
