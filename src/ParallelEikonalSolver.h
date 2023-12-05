@@ -59,7 +59,7 @@ private:
             Node* node = local_list.getNext();
             int v = node -> data;
             double old_solution = get_solution(v, vertex_to_solution);
-            double new_solution = update(v);
+            double new_solution = update(v, vertex_to_solution);
             solutions[p_out*solutions.size()/2+v] = new_solution;
             //write in map
             vertex_to_solution.insert(std::pair<int, double> (v, new_solution));
@@ -69,7 +69,7 @@ private:
                 for (auto b: v_neighbours) {
                     if (!local_list.isPresent(b)) {
                         double old_solution_b = get_solution(v, vertex_to_solution);
-                        double new_solution_b = update(b);
+                        double new_solution_b = update(b, vertex_to_solution);
                         if (old_solution_b > new_solution_b) {
                             solutions[p_out*solutions.size()/2+b] = new_solution_b;
                             // write in map
@@ -115,7 +115,7 @@ private:
     }
 
 
-    double update(int vertex) {
+    double update(int vertex, const std::map<int, double> vertex_to_solution) {
         std::vector<int> triangles = mesh.getShapes(vertex);
         std::vector<double> solutions;
         int number_of_vertices = mesh.getVerticesPerShape();
@@ -129,7 +129,7 @@ private:
             coordinates[number_of_vertices - 1] = mesh.getCoordinates(vertex);
 
             for(int j = 0; j < number_of_vertices - 1; j++) {
-                solutions_base[j] = get_solution(triangles[i + j]);
+                solutions_base[j] = get_solution(triangles[i + j], vertex_to_solution);
             }
             solutions.push_back(solveLocalProblem(coordinates, solutions_base));
         }
