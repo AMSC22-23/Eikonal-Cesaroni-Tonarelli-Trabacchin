@@ -10,15 +10,15 @@
 #include <cmath>
 #include <chrono>
 
-int main66(){
-    const std::string fileName = "../test/triangulated_mesh_test.vtk";
-    TriangularMesh<3> mesh (fileName);
+int main45(){
+    const std::string fileName = "../test/test_mesh.vtk";
+    TriangularMesh<2> mesh (fileName);
     //std::cout<<mesh.toString() << std::endl;
 
     std::vector<int> boundary;
     boundary.push_back(0);
-    EikonalSolver<3,3> serial_solver(mesh, boundary);
-    ParallelEikonalSolver<3,3> solver(mesh, boundary,4);
+    EikonalSolver<2,3> serial_solver(mesh, boundary);
+    ParallelEikonalSolver<2,3> solver(mesh, boundary,4);
     auto start1 = std::chrono::high_resolution_clock::now();
     serial_solver.solve();
     auto stop1 = std::chrono::high_resolution_clock::now();

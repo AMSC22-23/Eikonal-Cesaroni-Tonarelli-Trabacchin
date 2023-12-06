@@ -144,6 +144,7 @@ public:
                     active_list.clear();
                 }
                 #pragma omp barrier
+                vertex_to_solution.clear();
                 while (!local_list.isEmpty()) {
 
                     Node *node = local_list.getNext();
@@ -156,7 +157,9 @@ public:
                     {
                         solutions[p_out * solutions.size() / 2 + v] = new_solution;
                     }
-                    vertex_to_solution.insert(std::pair<int, double>(v, new_solution));
+
+                    //vertex_to_solution.insert(std::pair<int, double>(v, new_solution));
+                    vertex_to_solution[v] = new_solution;
                     if (std::abs(old_solution - new_solution) < eikonal_tol_par) {
                         std::vector<int> v_neighbours = mesh.getNeighbors(v);
                         for (auto b: v_neighbours) {
@@ -170,8 +173,8 @@ public:
                                     {
                                         solutions[p_out * solutions.size() / 2 + b] = new_solution_b;
                                     }
-
-                                    vertex_to_solution.insert(std::pair<int, double>(b, new_solution_b));
+                                    //vertex_to_solution.insert(std::pair<int, double>(b, new_solution_b));
+                                    vertex_to_solution[b] = new_solution_b;
                                     #pragma omp critical(active)
                                     {
                                         active_list.push_back(b);
@@ -191,6 +194,9 @@ public:
             }
         }
     }
+
+
+
 
 private:
     Mesh<D>& mesh;

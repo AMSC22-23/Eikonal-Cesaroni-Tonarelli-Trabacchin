@@ -57,6 +57,44 @@ public:
             }
         }
     }
+    void reset() {
+        std::fill(solutions_in.begin(), solutions_in.end(), 10000);
+        for(auto bv : boundary_vertices){
+            solutions_out[bv] = 0;
+            solutions_in[bv] = 0;
+        }
+    }
+
+    void solve_parallel(){
+        int count = 0;
+        for(auto bv : boundary_vertices){
+            for(auto neighbor : mesh.getNeighbors(bv)){
+                active_list.add(neighbor);
+            }
+        }
+        while(!active_list.isEmpty()){
+            Node* node = active_list.getNext();
+            int v = node -> data;
+            double old_solution = solutions_in[v];
+            double new_solution = update_parallel(v);
+            solutions_in[v] = new_solution;
+
+            if(std::abs(old_solution - new_solution) < eikonal_tol) {
+                std::vector<int> v_neighbours = mesh.getNeighbors(v);
+                for (auto b: v_neighbours) {
+                    if (!active_list.isPresent(b)) {
+                        double old_solution_b = solutions_in[b];
+                        double new_solution_b = update_parallel(b);
+                        if (old_solution_b > new_solution_b) {
+                            solutions_in[b] = new_solution_b;
+                            active_list.add(b);
+                        }
+                    }
+                }
+                active_list.remove(node);
+            }
+        }
+    }
 
     std::vector<double>& getSolutions(){
         return solutions_in;
@@ -87,6 +125,34 @@ protected:
         return min;
     }
 
+    double update_parallel(int vertex) {
+        std::vector<int> triangles = mesh.getShapes(vertex);
+        std::vector<double> solutions;
+        int number_of_vertices = mesh.getVerticesPerShape();
+        solutions.resize(triangles.size() / D, DBL_MAX);
+        #pragma omp parallel for num_threads(4) default(none) shared(solutions, triangles, mesh, number_of_vertices, vertex)
+        for(int i = 0; i < triangles.size(); i += number_of_vertices - 1){
+            std::array<std::array<double, D>, N> coordinates;
+            std::array<double, N - 1> solutions_base;
+            for(int j = 0; j < number_of_vertices - 1; j++) {
+                coordinates[j] = mesh.getCoordinates(triangles[i + j]);
+            }
+            coordinates[number_of_vertices - 1] = mesh.getCoordinates(vertex);
+
+            for(int j = 0; j < number_of_vertices - 1; j++) {
+                solutions_base[j] = solutions_in[triangles[i + j]];
+            }
+            double solution_local = solveLocalProblem(coordinates, solutions_base);
+#pragma omp critical(sol_local)
+            {
+                solutions.push_back(solution_local);
+            }
+
+        }
+
+        double min = *std::min_element(solutions.begin(), solutions.end());
+        return min;
+    }
     double solveLocalProblem(std::array<std::array<double, D>, N> coordinates, std::array<double, N - 1> solutions_base){
 
         using VectorExt = typename Eikonal::Eikonal_traits<D, N - 2>::VectorExt;

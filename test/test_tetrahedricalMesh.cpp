@@ -12,17 +12,18 @@
 #include <chrono>
 
 int main(){
-    std::string fileName = "../test/output-mesh-cube-40.vtk";
+    std::string fileName = "../test/output-mesh-cube-20.vtk";
     TetrahedricalMesh<3> mesh (fileName);
 
 
     std::vector<int> boundary;
     boundary.push_back(0);
     EikonalSolver<3,4> serial_solver(mesh, boundary);
-    ParallelEikonalSolver<3,4> solver(mesh, boundary,4);
+    ParallelEikonalSolver<3,4> solver(mesh, boundary,12);
     auto start1 = std::chrono::high_resolution_clock::now();
     serial_solver.solve();
     auto stop1 = std::chrono::high_resolution_clock::now();
+    std::cout << "finished serial" << std::endl;
     auto start2 = std::chrono::high_resolution_clock::now();
     solver.solve1();
     auto stop2 = std::chrono::high_resolution_clock::now();
