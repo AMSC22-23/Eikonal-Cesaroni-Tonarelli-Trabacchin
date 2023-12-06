@@ -24,7 +24,7 @@ int main(){
     serial_solver.solve();
     auto stop1 = std::chrono::high_resolution_clock::now();
     auto start2 = std::chrono::high_resolution_clock::now();
-    solver.solve();
+    solver.solve1();
     auto stop2 = std::chrono::high_resolution_clock::now();
     for(int i = 0; i < solver.getSolutions().size();i++) {
         std::cout << i << " " <<"(" << mesh.getCoordinates(i)[0] << ", " << mesh.getCoordinates(i)[1] <<", " << mesh.getCoordinates(i)[2]

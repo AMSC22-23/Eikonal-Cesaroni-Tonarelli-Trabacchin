@@ -7,7 +7,7 @@
 #include "EikonalSolver.h"
 #include <cmath>
 
-int main1(){
+int main2(){
     const std::string fileName = "../test/triangular_mesh_test.vtk";
     TriangularMesh<2> mesh (fileName);
     //std::cout<<mesh.toString() << std::endl;
