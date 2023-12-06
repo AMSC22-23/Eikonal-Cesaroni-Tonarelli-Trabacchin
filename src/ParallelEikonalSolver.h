@@ -119,6 +119,79 @@ public:
         }
         return sol;
     }
+
+
+    void solve1(){
+        for(auto bv : boundary_vertices){
+            for(auto neighbor : mesh.getNeighbors(bv)){
+                active_list.push_back(neighbor);
+            }
+        }
+        #pragma omp parallel default(none) shared(std::cout, active_list, solutions, p_out) num_threads(threads_number)
+        {
+
+            std::map<int,double> vertex_to_solution;
+            DoubleCircularList local_list;
+
+            int thread_id = omp_get_thread_num();
+
+            while(!active_list.empty()) {
+                for(int i=thread_id; i<active_list.size(); i+=threads_number){
+                    local_list.add(active_list[i]);
+                }
+                #pragma omp barrier
+                if(thread_id == 0) {
+                    active_list.clear();
+                }
+                #pragma omp barrier
+                while (!local_list.isEmpty()) {
+
+                    Node *node = local_list.getNext();
+                    int v = node->data;
+                    //double old_solution = get_solution(v, vertex_to_solution);
+                    double old_solution;
+                    old_solution = getLocalSolution(v,vertex_to_solution);
+                    double new_solution = update(v, vertex_to_solution);
+                    #pragma omp critical(sol_access)
+                    {
+                        solutions[p_out * solutions.size() / 2 + v] = new_solution;
+                    }
+                    vertex_to_solution.insert(std::pair<int, double>(v, new_solution));
+                    if (std::abs(old_solution - new_solution) < eikonal_tol_par) {
+                        std::vector<int> v_neighbours = mesh.getNeighbors(v);
+                        for (auto b: v_neighbours) {
+                            if (!local_list.isPresent(b)) {
+                                //double old_solution_b = get_solution(v, vertex_to_solution);
+                                double old_solution_b;
+                                old_solution_b = getLocalSolution(b, vertex_to_solution);
+                                double new_solution_b = update(b, vertex_to_solution);
+                                if (old_solution_b > new_solution_b) {
+                                    #pragma omp critical(sol_access)
+                                    {
+                                        solutions[p_out * solutions.size() / 2 + b] = new_solution_b;
+                                    }
+
+                                    vertex_to_solution.insert(std::pair<int, double>(b, new_solution_b));
+                                    #pragma omp critical(active)
+                                    {
+                                        active_list.push_back(b);
+                                    }
+                                }
+                            }
+                        }
+                        local_list.remove(node);
+                    }
+                }
+                #pragma omp barrier
+                if(thread_id == 0) {
+                    p_out = (p_out + 1) % 2;
+                    p_in = (p_in + 1) % 2;
+                }
+
+            }
+        }
+    }
+
 private:
     Mesh<D>& mesh;
     std::vector<int>& boundary_vertices;
@@ -129,7 +202,7 @@ private:
     int p_out;
     int p_in;
 
-    double get_solution(int vertex, const std::map<int, double>& vertex_to_solution){
+    double getLocalSolution(int vertex, const std::map<int, double>& vertex_to_solution){
         auto it = vertex_to_solution.find(vertex);
         if(it != vertex_to_solution.end()){
             return it->second;
@@ -139,42 +212,6 @@ private:
 
     }
 
-    void solve_step(int thread_id){
-        std::map<int,double> vertex_to_solution;
-        DoubleCircularList local_list;
-        for(int i=thread_id; i<active_list.size(); i+=threads_number){
-            local_list.add(active_list[i]);
-        }
-        while(!local_list.isEmpty()){
-            Node* node = local_list.getNext();
-            int v = node -> data;
-            double old_solution = get_solution(v, vertex_to_solution);
-            double new_solution = update(v, vertex_to_solution);
-            solutions[p_out*solutions.size()/2+v] = new_solution;
-            //write in map
-            vertex_to_solution.insert(std::pair<int, double> (v, new_solution));
-
-            if(std::abs(old_solution - new_solution) < eikonal_tol) {
-                std::vector<int> v_neighbours = mesh.getNeighbors(v);
-                for (auto b: v_neighbours) {
-                    if (!local_list.isPresent(b)) {
-                        double old_solution_b = get_solution(v, vertex_to_solution);
-                        double new_solution_b = update(b, vertex_to_solution);
-                        if (old_solution_b > new_solution_b) {
-                            solutions[p_out*solutions.size()/2+b] = new_solution_b;
-                            // write in map
-                            vertex_to_solution.insert(std::pair<int, double> (b, new_solution_b));
-                            active_list;
-                        }
-                    }
-                }
-                local_list.remove(node);
-            }
-
-        }
-
-
-    }
 
     double solveLocalProblem(std::array<std::array<double, D>, N> coordinates, std::array<double, N - 1> solutions_base){
 
@@ -220,11 +257,7 @@ private:
 
             for(int j = 0; j < number_of_vertices - 1; j++) {
                 //solutions_base[j] = get_solution(triangles[i + j], vertex_to_solution);
-                #pragma omp critical(sol_access)
-                {
-                    solutions_base[j] = this->solutions[p_in * this->solutions.size() / 2 + triangles[i + j]];
-                }
-
+                solutions_base[j] = getLocalSolution(triangles[i+j], vertex_to_solution);
             }
             solutions.push_back(solveLocalProblem(coordinates, solutions_base));
         }
