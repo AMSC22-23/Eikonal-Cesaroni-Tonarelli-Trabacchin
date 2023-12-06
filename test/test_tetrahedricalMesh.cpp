@@ -10,7 +10,7 @@
 #include <ctime>
 #include <chrono>
 
-int main(){
+int main8(){
     std::string fileName = "../test/output-mesh-cube-40.vtk";
     TetrahedricalMesh<3> mesh (fileName);
 
