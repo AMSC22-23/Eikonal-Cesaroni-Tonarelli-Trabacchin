@@ -54,11 +54,7 @@ public:
                 }
                 #pragma omp barrier
                 while (!local_list.isEmpty()) {
-                    #pragma omp critical(test)
-                    {
-                        std::cout << "thread " << thread_id << " is alive" << std::endl;
-                    }
-                    //std::cout << "thread " << thread_id << " is alive" << std::endl;
+
                     Node *node = local_list.getNext();
                     int v = node->data;
                     //double old_solution = get_solution(v, vertex_to_solution);
@@ -73,17 +69,9 @@ public:
                     {
                         solutions[p_out * solutions.size() / 2 + v] = new_solution;
                     }
-                    #pragma omp critical(test)
-                    {
-                        std::cout << "for vertex "  << v <<  " new solution " << new_solution << " old solution " << old_solution << std::endl;
-                    }
                     //vertex_to_solution.insert(std::pair<int, double>(v, new_solution));
 
                     if (std::abs(old_solution - new_solution) < eikonal_tol_par) {
-                        #pragma omp critical(test)
-                        {
-                            std::cout << "thread " << thread_id << " enters if" << std::endl;
-                        }
                         std::vector<int> v_neighbours = mesh.getNeighbors(v);
                         for (auto b: v_neighbours) {
                             if (!local_list.isPresent(b)) {
@@ -103,7 +91,6 @@ public:
                                     //vertex_to_solution.insert(std::pair<int, double>(b, new_solution_b));
                                     #pragma omp critical(active)
                                     {
-                                        std::cout << "added to active" << std::endl;
                                         active_list.push_back(b);
                                     }
                                 }
@@ -111,15 +98,11 @@ public:
                         }
                         local_list.remove(node);
                     } else {
-                        #pragma omp critical(test)
-                        {
-                            std::cout << "thread " << thread_id << " fails if" << std::endl;
-                        }
+
                     }
                 }
                 #pragma omp barrier
                 if(thread_id == 0) {
-                    std::cout << "finished" << std::endl;
                     p_out = (p_out + 1) % 2;
                     p_in = (p_in + 1) % 2;
                 }
