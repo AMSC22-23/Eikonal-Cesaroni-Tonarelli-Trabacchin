@@ -4,12 +4,13 @@
 
 #ifndef EIKONAL_CESARONI_TONARELLI_TRABACCHIN_PARALLELEIKONALSOLVER_H
 #define EIKONAL_CESARONI_TONARELLI_TRABACCHIN_PARALLELEIKONALSOLVER_H
-#define eikonal_tol_par 1e-6
+#define eikonal_tol_par 1e-4
 #include "Mesh.h"
 #include "DoubleCircularList.h"
 #include <float.h>
 #include "../localProblem_alt2/include/Phi.hpp"
 #include "../localProblem_alt2/include/solveEikonalLocalProblem.hpp"
+#include "omp.h"
 template<int D, int N>
 class ParallelEikonalSolver{
 public:
@@ -20,11 +21,12 @@ public:
             solutions[bv] = 0;
             solutions[bv+mesh.getNumberVertices()]=0;
         }
-        p_out = 1;
-        p_in = 1;
+        p_out = 0;
+        p_in = 0;
     }
 
-    void solve(){
+
+    void solve(){ //doesn't work
         for(auto bv : boundary_vertices){
             for(auto neighbor : mesh.getNeighbors(bv)){
                 active_list.push_back(neighbor);
@@ -111,6 +113,7 @@ public:
         }
     }
 
+
     std::vector<double> getSolutions() {
         std::vector<double> sol;
         sol.resize(solutions.size()/2);
@@ -121,7 +124,7 @@ public:
     }
 
 
-    void solve1(){
+    void solve1(){ //WORKS!!!! DO NOT TOUCH!!!!!
         for(auto bv : boundary_vertices){
             for(auto neighbor : mesh.getNeighbors(bv)){
                 active_list.push_back(neighbor);
@@ -129,6 +132,7 @@ public:
         }
         #pragma omp parallel default(none) shared(std::cout, active_list, solutions, p_out) num_threads(threads_number)
         {
+            int address;
 
             std::map<int,double> vertex_to_solution;
             DoubleCircularList local_list;
@@ -153,14 +157,20 @@ public:
                     double old_solution;
                     old_solution = getLocalSolution(v,vertex_to_solution);
                     double new_solution = update(v, vertex_to_solution);
+                    address = p_out * solutions.size() / 2 + v;
+                    //#pragma omp atomic write seq_cst
                     #pragma omp critical(sol_access)
                     {
-                        solutions[p_out * solutions.size() / 2 + v] = new_solution;
+                        solutions[address] = new_solution;
                     }
 
                     //vertex_to_solution.insert(std::pair<int, double>(v, new_solution));
                     vertex_to_solution[v] = new_solution;
                     if (std::abs(old_solution - new_solution) < eikonal_tol_par) {
+                        //#pragma omp critical(print_test)
+                        //{
+                            //std::cout << "vertex " << v << " has converged" << std::endl;
+                        //}
                         std::vector<int> v_neighbours = mesh.getNeighbors(v);
                         for (auto b: v_neighbours) {
                             if (!local_list.isPresent(b)) {
@@ -169,9 +179,11 @@ public:
                                 old_solution_b = getLocalSolution(b, vertex_to_solution);
                                 double new_solution_b = update(b, vertex_to_solution);
                                 if (old_solution_b > new_solution_b) {
+                                    address = p_out * solutions.size() / 2 + b;
+                                    //#pragma omp atomic write seq_cst
                                     #pragma omp critical(sol_access)
                                     {
-                                        solutions[p_out * solutions.size() / 2 + b] = new_solution_b;
+                                        solutions[address] = new_solution_b;
                                     }
                                     //vertex_to_solution.insert(std::pair<int, double>(b, new_solution_b));
                                     vertex_to_solution[b] = new_solution_b;
@@ -187,10 +199,91 @@ public:
                 }
                 #pragma omp barrier
                 if(thread_id == 0) {
-                    p_out = (p_out + 1) % 2;
-                    p_in = (p_in + 1) % 2;
+                    //p_out = (p_out + 1) % 2;
+                    //p_in = (p_in + 1) % 2;
                 }
+            }
+        }
+    }
 
+    void solve2(){
+        for(auto bv : boundary_vertices){
+            for(auto neighbor : mesh.getNeighbors(bv)){
+                active_list.push_back(neighbor);
+            }
+        }
+        #pragma omp parallel default(none) shared(std::cout, active_list, solutions, p_out) num_threads(threads_number)
+        {
+            int address;
+
+            std::map<int,double> vertex_to_solution;
+            DoubleCircularList local_list;
+
+            int thread_id = omp_get_thread_num();
+
+            while(!active_list.empty()) {
+                for(int i=thread_id; i<active_list.size(); i+=threads_number){
+                    local_list.add(active_list[i]);
+                }
+                #pragma omp barrier
+                if(thread_id == 0) {
+                    active_list.clear();
+                }
+                #pragma omp barrier
+                vertex_to_solution.clear();
+                while (!local_list.isEmpty()) {
+
+                    Node *node = local_list.getNext();
+                    int v = node->data;
+                    //double old_solution = get_solution(v, vertex_to_solution);
+                    double old_solution;
+                    old_solution = getLocalSolution(v,vertex_to_solution);
+                    double new_solution = update(v, vertex_to_solution);
+                    address = p_out * solutions.size() / 2 + v;
+                    #pragma omp atomic write relaxed
+                    //#pragma omp critical(sol_access)
+                    //{
+                        solutions[address] = new_solution;
+                    //}
+
+                    //vertex_to_solution.insert(std::pair<int, double>(v, new_solution));
+                    vertex_to_solution[v] = new_solution;
+                    if (std::abs(old_solution - new_solution) < eikonal_tol_par) {
+                        //#pragma omp critical(print_test)
+                        //{
+                        //std::cout << "vertex " << v << " has converged" << std::endl;
+                        //}
+                        std::vector<int> v_neighbours = mesh.getNeighbors(v);
+                        for (auto b: v_neighbours) {
+                            if (!local_list.isPresent(b)) {
+                                //double old_solution_b = get_solution(v, vertex_to_solution);
+                                double old_solution_b;
+                                old_solution_b = getLocalSolution(b, vertex_to_solution);
+                                double new_solution_b = update(b, vertex_to_solution);
+                                if (old_solution_b > new_solution_b) {
+                                    address = p_out * solutions.size() / 2 + b;
+                                    #pragma omp atomic write relaxed
+                                    //#pragma omp critical(sol_access)
+                                    //{
+                                        solutions[address] = new_solution_b;
+                                    //}
+                                    //vertex_to_solution.insert(std::pair<int, double>(b, new_solution_b));
+                                    vertex_to_solution[b] = new_solution_b;
+                                    #pragma omp critical(active)
+                                    {
+                                        active_list.push_back(b);
+                                    }
+                                }
+                            }
+                        }
+                        local_list.remove(node);
+                    }
+                }
+                #pragma omp barrier
+                if(thread_id == 0) {
+                    //p_out = (p_out + 1) % 2;
+                    //p_in = (p_in + 1) % 2;
+                }
             }
         }
     }
@@ -213,9 +306,15 @@ private:
         if(it != vertex_to_solution.end()){
             return it->second;
         } else {
-            return solutions[(p_out==1 ? 0 : 1)*solutions.size()/2+vertex];
+            double res;
+            int address = p_in*solutions.size()/2+vertex;
+            #pragma omp atomic read relaxed
+            //#pragma omp critical(sol_access)
+            //{
+                res = solutions[address];
+            //}
+            return res;
         }
-
     }
 
 

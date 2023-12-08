@@ -10,6 +10,7 @@ struct Node {
     int data;
     Node* next;
     Node* prec;
+    bool taken;
     explicit Node(int data):data(data) {next = nullptr;prec = nullptr;}
 };
 class DoubleCircularList {
@@ -20,6 +21,9 @@ public:
         curr = nullptr;
     }
     Node* getNext() {
+        if(head == nullptr) {
+            return nullptr;
+        }
         Node* res = curr;
         curr = safe_advance(curr);
         return res;

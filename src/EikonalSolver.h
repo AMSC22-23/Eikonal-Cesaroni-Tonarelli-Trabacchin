@@ -25,8 +25,6 @@ public:
         }
     }
 
-
-
     void solve(){
         int count = 0;
         for(auto bv : boundary_vertices){
@@ -42,6 +40,7 @@ public:
             solutions_in[v] = new_solution;
 
             if(std::abs(old_solution - new_solution) < eikonal_tol) {
+                //std::cout << "vertex " << v << " has converged" << std::endl;
                 std::vector<int> v_neighbours = mesh.getNeighbors(v);
                 for (auto b: v_neighbours) {
                     if (!active_list.isPresent(b)) {
@@ -57,6 +56,8 @@ public:
             }
         }
     }
+
+
     void reset() {
         std::fill(solutions_in.begin(), solutions_in.end(), 10000);
         for(auto bv : boundary_vertices){
@@ -64,6 +65,7 @@ public:
             solutions_in[bv] = 0;
         }
     }
+
 
     void solve_parallel(){
         int count = 0;
@@ -125,6 +127,7 @@ protected:
         return min;
     }
 
+
     double update_parallel(int vertex) {
         std::vector<int> triangles = mesh.getShapes(vertex);
         std::vector<double> solutions;
@@ -143,7 +146,7 @@ protected:
                 solutions_base[j] = solutions_in[triangles[i + j]];
             }
             double solution_local = solveLocalProblem(coordinates, solutions_base);
-#pragma omp critical(sol_local)
+            #pragma omp critical(sol_local)
             {
                 solutions.push_back(solution_local);
             }
@@ -153,6 +156,8 @@ protected:
         double min = *std::min_element(solutions.begin(), solutions.end());
         return min;
     }
+
+
     double solveLocalProblem(std::array<std::array<double, D>, N> coordinates, std::array<double, N - 1> solutions_base){
 
         using VectorExt = typename Eikonal::Eikonal_traits<D, N - 2>::VectorExt;
