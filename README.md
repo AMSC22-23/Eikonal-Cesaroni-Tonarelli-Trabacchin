@@ -2,9 +2,9 @@
 Eikonal implementation for the Advanced Methods for Scientific Computing (AMSC) Course @Polimi
 
 **Students**:
-- Sabrina Cesaroni
-- Melanie Tonarelli
-- Tommaso Trabacchin 
+- [Sabrina Cesaroni](https://github.com/SabrinaCesaroni)
+- [Melanie Tonarelli](https://github.com/melanie-t27)
+- [Tommaso Trabacchin](https://github.com/tommasotrabacchinpolimi) 
 
 ## Introduction
 An Eikonal equation is a non-linear first-order partial differential equation 
