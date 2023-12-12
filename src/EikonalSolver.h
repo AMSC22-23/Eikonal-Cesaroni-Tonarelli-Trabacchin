@@ -16,6 +16,7 @@ public:
 
     virtual std::vector<double>& getSolutions() = 0;
 
+    virtual ~EikonalSolver() = 0;
 };
 
 #endif //EIKONAL_CESARONI_TONARELLI_TRABACCHIN_EIKONALSOLVER_H
