@@ -11,6 +11,7 @@
 #define eikonal_tol_par 1e-4
 #include "Mesh.h"
 #include "DoubleCircularList.h"
+#include "EikonalSolver.h"
 #include <cfloat>
 #include "../localProblem_alt2/include/Phi.hpp"
 #include "../localProblem_alt2/include/solveEikonalLocalProblem.hpp"
@@ -18,31 +19,31 @@
 #include <algorithm>
 
 template<int D, int N>
-class ParallelEikonalSolver{
+class ParallelEikonalSolver : public EikonalSolver<D,N> {
 public:
     ParallelEikonalSolver(Mesh<D>& mesh, std::vector<int>& boundary_vertices,
                           typename Eikonal::Eikonal_traits<D,N - 2>::MMatrix M,  int threads_number) :
-            mesh(mesh), boundary_vertices(boundary_vertices), threads_number(threads_number), velocity{M}{
-        solutions.resize(mesh.getNumberVertices(), 1000);
+            EikonalSolver<D,N>(mesh), boundary_vertices(boundary_vertices), threads_number(threads_number), velocity{M}{
+        this->solutions.resize(mesh.getNumberVertices(), 1000);
         for(auto bv : boundary_vertices)
-            solutions[bv] = 0;
+            this->solutions[bv] = 0;
     }
 
     void solve(){
-        std::vector<int> present(solutions.size());
+        std::vector<int> present(this->solutions.size());
         std::fill(present.begin(), present.end(), 0);
-        int ACTIVE_LIST_LENGTH = solutions.size();
+        int ACTIVE_LIST_LENGTH = this->solutions.size();
         active_list.resize(ACTIVE_LIST_LENGTH);
         int activeListIndex = 0;
         for(auto bv : boundary_vertices){
-            for(auto neighbor : mesh.getNeighbors(bv)){
+            for(auto neighbor : this->mesh.getNeighbors(bv)){
                 active_list[activeListIndex] = neighbor;
                 present[neighbor] = 1;
                 activeListIndex++;
             }
         }
 
-        #pragma omp parallel default(none) shared(present, std::cout, active_list, solutions, activeListIndex, ACTIVE_LIST_LENGTH) num_threads(threads_number)
+        #pragma omp parallel default(none) shared(present, std::cout, active_list, this->solutions, activeListIndex, ACTIVE_LIST_LENGTH) num_threads(threads_number)
         {
             int address;
             std::map<int,double> vertex_to_solution;
@@ -75,7 +76,7 @@ public:
                     writeLocalSolutionEfficient(address, new_solution);
                     vertex_to_solution[v] = new_solution;
                     if (std::abs(old_solution - new_solution) < eikonal_tol_par) {
-                        std::vector<int> v_neighbours = mesh.getNeighbors(v);
+                        std::vector<int> v_neighbours = this->mesh.getNeighbors(v);
                         for (auto b: v_neighbours) {
                             int isPresent;
                             #pragma omp atomic capture relaxed
@@ -105,37 +106,35 @@ public:
 
     std::vector<double> getSolutions() {
         std::vector<double> sol;
-        sol.resize(solutions.size());
+        sol.resize(this->solutions.size());
         for(int i = 0; i < sol.size(); i++) {
-            sol[i] = solutions[i];
+            sol[i] = this->solutions[i];
         }
         return sol;
     }
 
-
 private:
-    Mesh<D>& mesh;
     std::vector<int>& boundary_vertices;
     std::vector<int> active_list;
-    std::vector<double> solutions;
+
     int threads_number;
     typename Eikonal::Eikonal_traits<D,N - 2>::MMatrix velocity;
 
     void writeLocalSolution(int address, double value) {
         #pragma omp atomic write relaxed
-        solutions[address] = value;
+        this->solutions[address] = value;
 
     }
 
     void writeLocalSolutionEfficient(int address, double value) {
         double snap;
-        snap = solutions[address];
+        snap = this->solutions[address];
         do{
 
             if(snap < value) {
                 break;
             }
-        }while(!__atomic_compare_exchange(&solutions[address],&snap, &value, false, __ATOMIC_RELAXED, __ATOMIC_RELAXED));
+        }while(!__atomic_compare_exchange(&this->solutions[address],&snap, &value, false, __ATOMIC_RELAXED, __ATOMIC_RELAXED));
     }
 
     double getLocalSolution(int vertex, const std::map<int, double>& vertex_to_solution){
@@ -146,7 +145,7 @@ private:
             double res;
             int address = vertex;
             #pragma omp atomic read relaxed
-            res = solutions[address];
+            res = this->solutions[address];
             return res;
         }
     }
@@ -168,25 +167,25 @@ private:
     }
 
     double update(int vertex, const std::map<int, double>& vertex_to_solution) {
-        std::vector<int> triangles = mesh.getShapes(vertex);
-        std::vector<double> solutions;
-        int number_of_vertices = mesh.getVerticesPerShape();
-        solutions.resize(triangles.size() / D, DBL_MAX);
+        std::vector<int> triangles = this->mesh.getShapes(vertex);
+        std::vector<double> sol;
+        int number_of_vertices = this->mesh.getVerticesPerShape();
+        sol.resize(triangles.size() / D, DBL_MAX);
         for(int i = 0; i < triangles.size(); i += number_of_vertices - 1){
             std::array<std::array<double, D>, N> coordinates;
             std::array<double, N - 1> solutions_base;
             for(int j = 0; j < number_of_vertices - 1; j++) {
-                coordinates[j] = mesh.getCoordinates(triangles[i + j]);
+                coordinates[j] = this->mesh.getCoordinates(triangles[i + j]);
             }
-            coordinates[number_of_vertices - 1] = mesh.getCoordinates(vertex);
+            coordinates[number_of_vertices - 1] = this->mesh.getCoordinates(vertex);
 
             for(int j = 0; j < number_of_vertices - 1; j++) {
                 solutions_base[j] = getLocalSolution(triangles[i+j], vertex_to_solution);
             }
-            solutions.push_back(solveLocalProblem(coordinates, solutions_base));
+            sol.push_back(solveLocalProblem(coordinates, solutions_base));
         }
 
-        double min = *std::min_element(solutions.begin(), solutions.end());
+        double min = *std::min_element(sol.begin(), sol.end());
         return min;
     }
 
