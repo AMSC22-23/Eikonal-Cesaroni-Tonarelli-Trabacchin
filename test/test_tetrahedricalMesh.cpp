@@ -12,7 +12,7 @@
 #include <chrono>
 
 int main(){
-    std::string fileName = "../test/meshes/output-mesh-cube-40.vtk";
+    std::string fileName = "../test/meshes/output-mesh-cube-5.vtk";
     TetrahedricalMesh<3> mesh (fileName);
 
     std::vector<int> boundary;
@@ -35,10 +35,10 @@ int main(){
     solver.solve();
     auto stop2 = std::chrono::high_resolution_clock::now();
 
-    for(int i = 0; i < solver.getSolutions().size();i++) {
-        std::cout << i << " " <<"(" << mesh.getCoordinates(i)[0] << ", " << mesh.getCoordinates(i)[1] <<", " << mesh.getCoordinates(i)[2]
-                  << ")"  << " " << solver.getSolutions()[i] << " " << serial_solver.getSolutions()[i] << std::endl;
-    }
+//    for(int i = 0; i < solver.getSolutions().size();i++) {
+//        std::cout << i << " " <<"(" << mesh.getCoordinates(i)[0] << ", " << mesh.getCoordinates(i)[1] <<", " << mesh.getCoordinates(i)[2]
+//                  << ")"  << " " << solver.getSolutions()[i] << " " << serial_solver.getSolutions()[i] << std::endl;
+//    }
 
     std::cout << "Execution time serial = " <<
               std::chrono::duration_cast<std::chrono::microseconds>(stop1 - start1).count() << std::endl;
@@ -48,7 +48,7 @@ int main(){
 
     std::cout << "speed up = " << (double)std::chrono::duration_cast<std::chrono::microseconds>(stop1 - start1).count() / (double)std::chrono::duration_cast<std::chrono::microseconds>(stop2 - start2).count() << std::endl;
 
-
+    solver.getSolutionsVTK();
 
     return 0;
 }

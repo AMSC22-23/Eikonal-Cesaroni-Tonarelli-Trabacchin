@@ -57,9 +57,11 @@ public:
         }
     }
 
-    std::vector<double>& getSolutions(){
+    std::vector<double> getSolutions(){
         return this->solutions;
     }
+
+    //~SerialEikonalSolver() override = default;
 
 protected:
 
@@ -77,7 +79,7 @@ protected:
             coordinates[number_of_vertices - 1] = this->mesh.getCoordinates(vertex);
 
             for(int j = 0; j < number_of_vertices - 1; j++) {
-                solutions_base[j] = sol[triangles[i + j]];
+                solutions_base[j] = this->solutions[triangles[i + j]];
             }
             sol.push_back(solveLocalProblem(coordinates, solutions_base));
         }

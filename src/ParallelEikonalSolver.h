@@ -43,7 +43,7 @@ public:
             }
         }
 
-        #pragma omp parallel default(none) shared(present, std::cout, active_list, this->solutions, activeListIndex, ACTIVE_LIST_LENGTH) num_threads(threads_number)
+        #pragma omp parallel default(none) shared(present, std::cout, active_list, EikonalSolver<D,N>::solutions, activeListIndex, ACTIVE_LIST_LENGTH) num_threads(threads_number)
         {
             int address;
             std::map<int,double> vertex_to_solution;
@@ -112,6 +112,8 @@ public:
         }
         return sol;
     }
+
+    //~ParallelEikonalSolver() override = default;
 
 private:
     std::vector<int>& boundary_vertices;

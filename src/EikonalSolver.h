@@ -6,6 +6,7 @@
 #define EIKONAL_CESARONI_TONARELLI_TRABACCHIN_EIKONALSOLVER_H
 
 #include "Mesh.h"
+#include <filesystem>
 #include "../localProblem_alt2/include/Eikonal_traits.hpp"
 
 template<int D, int N>
@@ -16,17 +17,18 @@ public:
 
     virtual void solve() = 0;
 
-    virtual std::vector<double>& getSolutions() = 0;
+    virtual std::vector<double> getSolutions() = 0;
 
-    virtual ~EikonalSolver() = 0;
+    //virtual ~EikonalSolver() = 0;
 
     void getSolutionsVTK(){
-        const std::string output_file_name = "output.vtk";
+        const std::string output_file_name = "../test/output_meshes/output.vtk";
         getSolutionsVTK(output_file_name);
     }
 
     void getSolutionsVTK(const std::string& output_file_name){
-        std::ofstream output_file(output_file_name);
+        std::string fileName = "../test/output_meshes/" + output_file_name + ".vtk";
+        std::ofstream output_file(fileName);
 
         // header
         output_file << "# vtk DataFile Version 3.0\n";
@@ -70,7 +72,8 @@ public:
             output_file << solution << " ";
         }
         output_file << "\n";
-
+        output_file.flush();
+        std::cout << "Output vtk file located in folder test/output_meshes\n";
         output_file.close();
     }
 
@@ -83,8 +86,8 @@ private:
         std::vector<std::array<int, N>> res;
         std::array<int, N> s;
         for(int i = 0; i < mesh.getNumberVertices(); i++){
+            //std::cout << "vertex " << i;
             std::vector<int> shapes = mesh.getShapes(i);
-            //TO-FINISH
             unsigned int flag = 0;
 
             for(int k = 0; k < shapes.size() - 1; k += N - 1){
@@ -101,9 +104,10 @@ private:
                     }
                     res.emplace_back(s);
                 }
-                s.clear();
+                flag = 0;
+                //std::cout << "flag = " << flag << " ";
             }
-
+            //std::cout << std::endl;
         }
         return res;
     }
@@ -111,16 +115,18 @@ private:
     std::string stringCoordinatesNode(std::array<double, D> coordinates){
         std::string res;
         for(int i = 0; i < D; i++){
-            res.append(coordinates[i] + " ");
+            res.append(std::to_string(coordinates[i]));
+            res.append(" ");
         }
         return res;
     }
 
     std::string stringNodesShape(std::array<int, N> shape){
         std::string res;
-        res.append(N + "   ");
+        res.append(std::to_string(N));
+        res.append("   ");
         for(int i = 0; i < N; i++){
-            res.append(shape[i] + "  ");
+            res.append(std::to_string(shape[i]) + "  ");
         }
         return res;
     }
