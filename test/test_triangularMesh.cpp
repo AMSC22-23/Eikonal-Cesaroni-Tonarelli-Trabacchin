@@ -18,12 +18,13 @@ int main(int argc, char* argv[]){
     if(argc > 0)
     {
         // Retrieve parameters
-        const std::string input_fileName = argv[0];
+        const std::string input_fileName = argv[1];
         int num_threads = 4;
-        if(argc == 2){
-            num_threads = std::atoi(argv[1]);
-        } else {
+        if(argc == 3){
             num_threads = std::atoi(argv[2]);
+        } else {
+            std::cout << "4 params" << std::endl;
+            num_threads = std::atoi(argv[3]);
         }
 
         // Instantiating mesh
@@ -63,8 +64,8 @@ int main(int argc, char* argv[]){
 
         // Writing the output file
         std::string output_fileName = "output";
-        if(argc == 3){
-            output_fileName = argv[1];
+        if(argc == 4){
+            output_fileName = argv[2];
         }
         serial_solver.getSolutionsVTK(output_fileName);
     }
