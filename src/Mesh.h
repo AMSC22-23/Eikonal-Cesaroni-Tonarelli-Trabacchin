@@ -12,6 +12,7 @@
 #include <set>
 #include <algorithm>
 #include <numeric>
+#include <float.h>
 
 template <int D>
 class Mesh {
@@ -25,7 +26,7 @@ public:
         while(true) {
             res+= "vertex " + std::to_string(cont) + ": " ;
             for(int i=index; i< (cont < ngh.size()-1 ? ngh[cont+1] : shapes.size()); i+= vertices_per_shape - 1){
-                res+=std::to_string(shapes[i]) + " " + std::to_string (shapes[i+1]) + ", ";
+                res+=std::to_string(shapes[i]) + " " + std::to_string(shapes[i+1]) + ", ";
                 index = i + vertices_per_shape - 1;
             }
             cont++;
@@ -70,9 +71,43 @@ public:
         return coord;
     }
 
+    int getMapVertex(int vertex){
+        return map_vertices[vertex];
+    }
+
+    int getOriginalNumberOfVertices(){
+        return map_vertices.size();
+    }
+
+    std::string getFilenameInputMesh(){
+        return filename_input_mesh;
+    }
+
+    int getNearestVertex(std::array<double, D> coordinates){
+        double min_distance = DBL_MAX;
+        int min_vertex = 0;
+        for(int i = 0; i < getNumberVertices(); i++){
+            double distance = getDistance(coordinates, getCoordinates(i));
+            if(distance < min_distance){
+                min_distance = distance;
+                min_vertex = i;
+            }
+        }
+        return min_vertex;
+    }
 
 protected:
-    std::vector<int> removeDuplicateVertices(double tol){
+
+    double getDistance(std::array<double, D> c1, std::array<double, D> c2){
+        double res = 0;
+        for(int i = 0; i < D; i++){
+            res += (c1[i] - c2[i]) * (c1[i] - c2[i]);
+        }
+        res = std::sqrt(res);
+        return res;
+    }
+
+    void removeDuplicateVertices(){
         std::vector<int> pos;
         pos.resize(geo.size()/D);
         std::iota(pos.begin(), pos.end(),0);
@@ -81,10 +116,9 @@ protected:
         int current_index = 0;
         int prec;
         std::vector<int> same;
-        std::vector<int> mapping_vector;
         std::vector<double> reduced_geo;
         reduced_geo.resize(0);
-        mapping_vector.resize(geo.size()/D);
+        map_vertices.resize(geo.size() / D);
 
         while(current_index < pos.size()){
             prec=current_index;
@@ -96,7 +130,7 @@ protected:
                     current_index++;
                 } else{
                     for(int j : same){
-                        mapping_vector[j]=(int)reduced_geo.size()/D;
+                        map_vertices[j]= (int)reduced_geo.size() / D;
                     }
                     for(int i=0; i<D; i++){
                         reduced_geo.push_back(geo[same[0]*D+i]);
@@ -107,7 +141,6 @@ protected:
             same.clear();
         }
         geo = reduced_geo;
-        return mapping_vector;
     }
 
     int verticesCompare(int i, int j){
@@ -122,24 +155,33 @@ protected:
     }
 
     std::vector<std::set<int>> init_mesh(const std::string& mesh_file_path, int vertices_per_shape_) {
+        filename_input_mesh = mesh_file_path;
         vertices_per_shape = vertices_per_shape_;
         std::ifstream mesh_file (mesh_file_path);
         std::vector<std::set<int>> sets;
         if(mesh_file.is_open()) {
             std::string buffer;
+
             std::getline(mesh_file, buffer);
             std::getline(mesh_file, buffer);
             std::getline(mesh_file, buffer);
             std::getline(mesh_file, buffer);
+
             mesh_file>>buffer;
             int vertices_number;
             mesh_file>>vertices_number;
             mesh_file>>buffer;
             geo.resize(vertices_number*D);
-            for(int i=0; i<vertices_number*D; i++){
-                mesh_file>>geo[i];
+            int ignore;
+            for(int i = 0; i < vertices_number; i++){
+                for(int j = 0; j < 3; j++){
+                    if(j < D)
+                        mesh_file >> geo[D * i + j];
+                    else mesh_file >> ignore;
+                }
+
             }
-            std::vector<int> mapping_vector = removeDuplicateVertices(1e-8);
+            removeDuplicateVertices();
 
 
             vertices_number = geo.size()/D;
@@ -155,7 +197,7 @@ protected:
                 tmp.resize(vertices_per_shape);
                 for(int j=0; j<vertices_per_shape; j++){
                     mesh_file>>tmp[j];
-                    tmp[j] = mapping_vector[tmp[j]];
+                    tmp[j] = map_vertices[tmp[j]];
                 }
                 for(int j=0; j < vertices_per_shape; j++){
                     for(int k=0; k < vertices_per_shape; k++){
@@ -177,5 +219,7 @@ protected:
     std::vector<int> shapes;
     std::vector<int> ngh;
     int vertices_per_shape = 0;
+    std::vector<int> map_vertices;
+    std::string filename_input_mesh;
 };
 #endif //EIKONAL_CESARONI_TONARELLI_TRABACCHIN_MESH_H

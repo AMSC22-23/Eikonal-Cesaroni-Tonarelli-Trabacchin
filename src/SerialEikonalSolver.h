@@ -40,7 +40,6 @@ public:
             this->solutions[v] = new_solution;
 
             if(std::abs(old_solution - new_solution) < eikonal_tol) {
-                //std::cout << "vertex " << v << " has converged" << std::endl;
                 std::vector<int> v_neighbours = this->mesh.getNeighbors(v);
                 for (auto b: v_neighbours) {
                     if (!active_list.isPresent(b)) {
@@ -60,8 +59,6 @@ public:
     std::vector<double> getSolutions(){
         return this->solutions;
     }
-
-    //~SerialEikonalSolver() override = default;
 
 protected:
 

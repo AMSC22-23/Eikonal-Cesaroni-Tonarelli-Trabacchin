@@ -62,6 +62,5 @@ public:
         }
     }
 
-
 };
 #endif //EIKONAL_CESARONI_TONARELLI_TRABACCHIN_TETRAHEDRICALMESH_H

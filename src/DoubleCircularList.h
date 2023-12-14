@@ -48,7 +48,7 @@ public:
     void remove(Node* nodeToRemove) {
         present.erase(nodeToRemove->data);
         if(nodeToRemove == curr) {
-            curr = curr -> next;
+            curr = safe_advance(curr);
         }
         if(nodeToRemove -> next != nullptr && nodeToRemove -> prec != nullptr) {
             (nodeToRemove -> prec) -> next = nodeToRemove -> next;
@@ -69,18 +69,6 @@ public:
     }
 
     bool isPresent(int v) {
-       /* if(head == nullptr) {
-            return false;
-        }
-        Node* pNode = head;
-        do {
-            if(pNode -> data == v) {
-                return true;
-            } else {
-                pNode = pNode -> next;
-            }
-        }while(pNode != nullptr);
-        return false;*/
        return present.find(v) != present.end();
     }
 

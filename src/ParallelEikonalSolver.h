@@ -113,8 +113,6 @@ public:
         return sol;
     }
 
-    //~ParallelEikonalSolver() override = default;
-
 private:
     std::vector<int>& boundary_vertices;
     std::vector<int> active_list;
