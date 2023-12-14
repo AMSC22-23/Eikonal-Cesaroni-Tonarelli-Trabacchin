@@ -3,28 +3,75 @@
 //
 #include <string>
 #include <iostream>
-#include "../src/TriangularMesh.h"
-#include "SerialEikonalSolver.h"
 #include <cmath>
+#include <chrono>
 
-int main(){
-    const std::string fileName = "../test/input_meshes/triangular/square.vtk";
-    TriangularMesh<2> mesh (fileName);
+#include "../src/TriangularMesh.h"
+#include "../src/SerialEikonalSolver.h"
+#include "../src/ParallelEikonalSolver.h"
+
+#define N 3 // Number of vertices in a shape
+#define D 2 // Dimension of the domain
 
 
-    std::cout<< mesh.toString() << std::endl;
+int main(int argc, char* argv[]){
+    if(argc > 0)
+    {
+        // Retrieve parameters
+        const std::string input_fileName = argv[0];
+        int num_threads = 4;
+        if(argc == 2){
+            num_threads = std::atoi(argv[1]);
+        } else {
+            num_threads = std::atoi(argv[2]);
+        }
 
-    std::vector<int> boundary;
-    boundary.push_back(mesh.getNearestVertex(std::array<double, 2>({0.5,0.5})));
+        // Instantiating mesh
+        TriangularMesh<D> mesh(input_fileName);
 
-    typename Eikonal::Eikonal_traits<2 ,1>::MMatrix M;
-    M << 1, 0.5,
-            0.5, 2;
+        // Setting boundary
+        std::vector<int> boundary;
+        boundary.push_back(mesh.getNearestVertex(std::array<double, D>({0, 0})));
 
-    SerialEikonalSolver<2,3> solver(mesh, boundary, M);
-    solver.solve();
+        // Setting velocity matrix
+        typename Eikonal::Eikonal_traits<D, 1>::MMatrix M;
+        M << 1, 0,
+                0, 3;
 
-    solver.getSolutionsVTK("output-triangular");
+        // Instantiating Eikonal Solver
+        SerialEikonalSolver<D, N> serial_solver(mesh, boundary, M);
+        ParallelEikonalSolver<D, N> parallel_solver(mesh, boundary, M, num_threads);
+
+        // SERIAL
+        auto start1 = std::chrono::high_resolution_clock::now();
+        serial_solver.solve();
+        auto stop1 = std::chrono::high_resolution_clock::now();
+
+        // PARALLEL
+        auto start2 = std::chrono::high_resolution_clock::now();
+        parallel_solver.solve();
+        auto stop2 = std::chrono::high_resolution_clock::now();
+
+        // Performance Result Table
+
+        std::cout << "Execution time serial = " <<
+                  std::chrono::duration_cast<std::chrono::microseconds>(stop1 - start1).count() << std::endl;
+
+        std::cout << "Execution time parallel = " <<
+                  std::chrono::duration_cast<std::chrono::microseconds>(stop2 - start2).count() << std::endl;
+
+
+        // Writing the output file
+        std::string output_fileName = "output";
+        if(argc == 3){
+            output_fileName = argv[1];
+        }
+        serial_solver.getSolutionsVTK(output_fileName);
+    }
+    else
+    {
+        std::cout << "No argument passed to the program\n";
+    }
 
     return 0;
 }

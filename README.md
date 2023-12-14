@@ -48,6 +48,28 @@ The `SerialEikonalSolver` and `ParallelEikonalSolver` are based on the algorithm
 The parallelisation was carried out using OpenMP.
 
 ## Usage
+To build the executable, from the root folder run the following commands:
+```bash
+$ mkdir build
+$ cd build
+$ cmake ..
+$ make
+```
+An executable for each test will be created into `/build`, and can be executed through:
+```bash
+$ ./test_name input-filename [output-filename] num-threads
+```
+where:
+- `test_name` is either `triangular`, `triangulated` or `tetrahedrical` depending on the type of dimension and type of the mesh;
+- `input-filename` is the input file path where the mesh will be retrieved. The program only accepts file in format vtk.
+- `output-filename` is the name of the output file. The file will be located in the folder `test/output_meshes`. If it is not specified,
+    the output filename will be by default `output.vtk`;
+- `num-threads` is the number of threads used in the parallel algorithm.
 
+We have already included some meshes in the folder `test/input_meshes`. For example:
+```bash
+$ ./triangulated ../test/input_meshes/triangulated/bunny.vtk output-bunny.vtk 4
+```
+will execute both the serial and the parallel algorithm on the well-known Stanford Bunny test model.
 
 ## Example

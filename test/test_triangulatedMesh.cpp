@@ -4,46 +4,74 @@
 
 #include <string>
 #include <iostream>
-#include "../src/TriangularMesh.h"
-#include "../src/SerialEikonalSolver.h"
-#include "../src/ParallelEikonalSolver.h"
 #include <cmath>
 #include <chrono>
 
-int main(){
-    const std::string fileName = "../test/input_meshes/triangulated/moai.vtk";
-    TriangularMesh<3> mesh (fileName);
+#include "../src/TriangularMesh.h"
+#include "../src/SerialEikonalSolver.h"
+#include "../src/ParallelEikonalSolver.h"
 
-    std::vector<int> boundary;
-    boundary.push_back(mesh.getNearestVertex(std::array<double,3>({0,0,0})));
+#define N 3 // Number of vertices in a shape
+#define D 3 // Dimension of the domain
 
-    typename Eikonal::Eikonal_traits<3, 1>::MMatrix M;
-    M << 1, 0, 0,
-         0, 3, 0,
-         0, 0, 7;
+int main(int argc, char* argv[]){
+    if(argc > 0)
+    {
+        // Retrieve parameters
+        const std::string input_fileName = argv[0];
+        int num_threads = 4;
+        if(argc == 2){
+            num_threads = std::atoi(argv[1]);
+        } else {
+            num_threads = std::atoi(argv[2]);
+        }
 
-    SerialEikonalSolver<3,3> serial_solver(mesh, boundary, M);
-    ParallelEikonalSolver<3,3> solver(mesh, boundary, M, 4);
+        // Instantiating mesh
+        TriangularMesh<D> mesh(input_fileName);
 
-    std::cout << "started serial\n";
-    auto start1 = std::chrono::high_resolution_clock::now();
-    serial_solver.solve();
-    auto stop1 = std::chrono::high_resolution_clock::now();
-    std::cout << "finished serial\n";
+        // Setting boundary
+        std::vector<int> boundary;
+        boundary.push_back(mesh.getNearestVertex(std::array<double, D>({0, 0, 0})));
 
-    std::cout << "started parallel\n";
-    auto start2 = std::chrono::high_resolution_clock::now();
-    solver.solve();
-    auto stop2 = std::chrono::high_resolution_clock::now();
-    std::cout << "finished parallel\n";
+        // Setting velocity matrix
+        typename Eikonal::Eikonal_traits<D, 1>::MMatrix M;
+        M << 1, 0, 0,
+                0, 3, 0,
+                0, 0, 7;
 
-    std::cout << "Execution time serial = " <<
-              std::chrono::duration_cast<std::chrono::microseconds>(stop1 - start1).count() << std::endl;
+        // Instantiating Eikonal Solver
+        SerialEikonalSolver<D, N> serial_solver(mesh, boundary, M);
+        ParallelEikonalSolver<D, N> parallel_solver(mesh, boundary, M, num_threads);
 
-    std::cout << "Execution time parallel = " <<
-              std::chrono::duration_cast<std::chrono::microseconds>(stop2 - start2).count() << std::endl;
+        // SERIAL
+        auto start1 = std::chrono::high_resolution_clock::now();
+        serial_solver.solve();
+        auto stop1 = std::chrono::high_resolution_clock::now();
 
-    solver.getSolutionsVTK("output-moai");
+        // PARALLEL
+        auto start2 = std::chrono::high_resolution_clock::now();
+        parallel_solver.solve();
+        auto stop2 = std::chrono::high_resolution_clock::now();
 
+        // Performance Result Table
+
+        std::cout << "Execution time serial = " <<
+                  std::chrono::duration_cast<std::chrono::microseconds>(stop1 - start1).count() << std::endl;
+
+        std::cout << "Execution time parallel = " <<
+                  std::chrono::duration_cast<std::chrono::microseconds>(stop2 - start2).count() << std::endl;
+
+
+        // Writing the output file
+        std::string output_fileName = "output";
+        if(argc == 3){
+            output_fileName = argv[1];
+        }
+        serial_solver.getSolutionsVTK(output_fileName);
+    }
+    else
+    {
+        std::cout << "No argument passed to the program\n";
+    }
     return 0;
 }
