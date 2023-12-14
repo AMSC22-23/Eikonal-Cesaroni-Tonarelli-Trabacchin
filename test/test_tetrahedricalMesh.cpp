@@ -11,7 +11,7 @@
 #include <ctime>
 #include <chrono>
 
-int main554(){
+int main(){
     std::string fileName = "../test/input_meshes/cube-5.vtk";
     TetrahedricalMesh<3> mesh (fileName);
 

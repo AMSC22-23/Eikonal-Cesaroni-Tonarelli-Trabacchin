@@ -107,7 +107,7 @@ public:
     std::vector<double> getSolutions() {
         std::vector<double> sol;
         sol.resize(this->solutions.size());
-        for(int i = 0; i < sol.size(); i++) {
+        for(size_t i = 0; i < sol.size(); i++) {
             sol[i] = this->solutions[i];
         }
         return sol;
@@ -171,7 +171,7 @@ private:
         std::vector<double> sol;
         int number_of_vertices = this->mesh.getVerticesPerShape();
         sol.resize(triangles.size() / D, DBL_MAX);
-        for(int i = 0; i < triangles.size(); i += number_of_vertices - 1){
+        for(size_t i = 0; i < triangles.size(); i += number_of_vertices - 1){
             std::array<std::array<double, D>, N> coordinates;
             std::array<double, N - 1> solutions_base;
             for(int j = 0; j < number_of_vertices - 1; j++) {

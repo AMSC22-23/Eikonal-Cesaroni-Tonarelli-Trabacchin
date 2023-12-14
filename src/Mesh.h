@@ -20,17 +20,17 @@ class Mesh {
 public:
 
     std::string toString() {
-        int cont = 0;
+        size_t cont = 0;
         int index = 0;
         std::string res = "";
         while(true) {
             res+= "vertex " + std::to_string(cont) + ": " ;
-            for(int i=index; i< (cont < ngh.size()-1 ? ngh[cont+1] : shapes.size()); i+= vertices_per_shape - 1){
-                res+=std::to_string(shapes[i]) + " " + std::to_string(shapes[i+1]) + ", ";
+            for(size_t i = index; i < (cont < ngh.size()-1 ? ngh[cont+1] : shapes.size()); i += vertices_per_shape - 1){
+                res += std::to_string(shapes[i]) + " " + std::to_string(shapes[i+1]) + ", ";
                 index = i + vertices_per_shape - 1;
             }
             cont++;
-            if(cont==ngh.size()){
+            if(cont == ngh.size()){
                 break;
             }
             res += "\n";
@@ -46,18 +46,18 @@ public:
         return vertices_per_shape;
     }
 
-    std::vector<int> getNeighbors(int vertex){
+    std::vector<int> getNeighbors(size_t vertex){
         std::set<int> neighbors;
-        for(int i = ngh[vertex]; i < (vertex != ngh.size() -1 ? ngh[vertex + 1] : shapes.size()); i++){
+        for(size_t i = ngh[vertex]; i < (vertex != ngh.size() -1 ? ngh[vertex + 1] : shapes.size()); i++){
             neighbors.insert(shapes[i]);
         }
         std::vector<int> res(neighbors.begin(), neighbors.end());
         return res;
     }
 
-    std::vector<int> getShapes(int vertex){
+    std::vector<int> getShapes(size_t vertex){
         std::vector<int> shapes_v;
-        for(int i = ngh[vertex]; i < (vertex != ngh.size() -1 ? ngh[vertex + 1] : shapes.size()); i++){
+        for(size_t i = ngh[vertex]; i < (vertex != ngh.size() -1 ? ngh[vertex + 1] : shapes.size()); i++){
             shapes_v.push_back(shapes[i]);
         }
         return shapes_v;
@@ -113,15 +113,15 @@ protected:
         std::iota(pos.begin(), pos.end(),0);
         std::sort(pos.begin(), pos.end(), [&](std::size_t i, std::size_t j) { return verticesCompare(i,j) == 1; });
 
-        int current_index = 0;
-        int prec;
+        size_t current_index = 0;
+        size_t prec;
         std::vector<int> same;
         std::vector<double> reduced_geo;
         reduced_geo.resize(0);
         map_vertices.resize(geo.size() / D);
 
         while(current_index < pos.size()){
-            prec=current_index;
+            prec = current_index;
             current_index++;
             same.push_back(pos[prec]);
             while(true){

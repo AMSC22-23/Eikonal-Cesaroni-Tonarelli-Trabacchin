@@ -26,7 +26,6 @@ public:
     }
 
     void solve(){
-        int count = 0;
         for(auto bv : boundary_vertices){
             for(auto neighbor : this->mesh.getNeighbors(bv)){
                 active_list.add(neighbor);
@@ -67,7 +66,7 @@ protected:
         std::vector<double> sol;
         int number_of_vertices = this->mesh.getVerticesPerShape();
         sol.resize(triangles.size() / D, DBL_MAX);
-        for(int i = 0; i < triangles.size(); i += number_of_vertices - 1){
+        for(size_t i = 0; i < triangles.size(); i += number_of_vertices - 1){
             std::array<std::array<double, D>, N> coordinates;
             std::array<double, N - 1> solutions_base;
             for(int j = 0; j < number_of_vertices - 1; j++) {

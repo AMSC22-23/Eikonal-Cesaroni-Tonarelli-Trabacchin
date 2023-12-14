@@ -7,7 +7,7 @@
 #include "SerialEikonalSolver.h"
 #include <cmath>
 
-int main35(){
+int main(){
     const std::string fileName = "../test/input_meshes/triangular/square.vtk";
     TriangularMesh<2> mesh (fileName);
 

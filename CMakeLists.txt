@@ -8,14 +8,20 @@ include_directories("localProblem/include")
 add_compile_options(-I${mkEigenInc})
 
 
-
-
-add_executable(Eikonal_Cesaroni_Tonarelli_Trabacchin
-        localProblem/solveEikonalLocalProblem.cpp localProblem/LineSearchSolver.cpp localProblem/DescentDirections.cpp
-        localProblem/DescentDirectionFactory.cpp test/test_tetrahedricalMesh.cpp
-        src/TetrahedricalMesh.h src/SerialEikonalSolver.h test/test_triangularMesh.cpp test/test_triangulatedMesh.cpp
-        src/EikonalSolver.h
+add_executable(tetrahedrical
+        test/test_tetrahedricalMesh.cpp
 )
-#target_link_libraries(Eikonal_Cesaroni_Tonarelli_Trabacchin PRIVATE OpenMP::OpenMP_CXX)
+
+add_executable(triangular
+        test/test_triangularMesh.cpp
+)
+
+add_executable(triangulated
+        test/test_triangulatedMesh.cpp
+)
+
+
 set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fopenmp")
 set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3")
+set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
+set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wextra")
