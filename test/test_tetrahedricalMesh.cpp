@@ -14,16 +14,11 @@
 int main(int argc, char* argv[]){
     constexpr int N = 4;
     constexpr int D = 3;
-    if(argc > 0)
+    if(argc == 5)
     {
         // Retrieve parameters
         const std::string input_fileName = argv[1];
-        int num_threads = 4;
-        if(argc == 3){
-            num_threads = std::atoi(argv[2]);
-        } else {
-            num_threads = std::atoi(argv[3]);
-        }
+        int num_threads = std::atoi(argv[2]);
 
         // Instantiating mesh
         TetrahedricalMesh<D> mesh(input_fileName);
@@ -35,8 +30,8 @@ int main(int argc, char* argv[]){
         // Setting velocity matrix
         typename Eikonal::Eikonal_traits<D, 1>::MMatrix M;
         M << 1, 0, 0,
-                0, 3, 0,
-                0, 0, 7;
+             0, 1, 0,
+             0, 0, 1;
 
         // Instantiating Eikonal Solver
         SerialEikonalSolver<D, N> serial_solver(mesh, boundary, M);
@@ -52,33 +47,37 @@ int main(int argc, char* argv[]){
         parallel_solver.solve();
         auto stop2 = std::chrono::high_resolution_clock::now();
 
-        // Print
-        std::cout << "SOLUTION:\n";
-        for(size_t i = 0 ; i < serial_solver.getSolutions().size(); i++){
-            std::cout << serial_solver.getSolutions()[i] << " " << parallel_solver.getSolutions()[i] << "\n";
-        }
-
         // Performance Result Table
-
-        std::cout << "Execution time serial = " <<
+        std::cout << "===============================================" << std::endl;
+        std::cout << "               EIKONAL SOLVER" << std::endl;
+        std::cout << "Input: " << input_fileName << std::endl;
+        std::cout << "Number of threads = " << num_threads << std::endl;
+        std::cout << std::endl;
+        std::cout << "Serial execution time = " <<
                   std::chrono::duration_cast<std::chrono::microseconds>(stop1 - start1).count() << std::endl;
 
-        std::cout << "Execution time parallel = " <<
+        std::cout << "Parallel execution time = " <<
                   std::chrono::duration_cast<std::chrono::microseconds>(stop2 - start2).count() << std::endl;
 
-        std::cout << "speed up = " << (double)std::chrono::duration_cast<std::chrono::microseconds>(stop1 - start1).count() /
+        std::cout << "Speed Up = " << (double)std::chrono::duration_cast<std::chrono::microseconds>(stop1 - start1).count() /
                 (double)std::chrono::duration_cast<std::chrono::microseconds>(stop2 - start2).count() << std::endl;
+        std::cout << std::endl;
 
         // Writing the output file
-        std::string output_fileName = "output";
-        if(argc == 4){
-            output_fileName = argv[2];
+        std::string output_fileName = argv[4];
+        std::string flag = argv[3];
+        if(flag == "s") {
+            std::cout << "Serial output can be found in ../test/output_meshes" << std::endl <<
+                    "with name: " << output_fileName << ".vtk" << std::endl;
+            serial_solver.getSolutionsVTK(output_fileName);
+        } else {
+            parallel_solver.getSolutionsVTK(output_fileName);
         }
-        serial_solver.getSolutionsVTK(output_fileName);
+        std::cout << "===============================================" << std::endl;
     }
     else
     {
-        std::cout << "No argument passed to the program\n";
+        std::cout << "Wrong argument passed to the program\n";
     }
 
     return 0;

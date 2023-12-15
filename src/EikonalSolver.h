@@ -21,11 +21,6 @@ public:
 
     virtual std::vector<double> getSolutions() = 0;
 
-    void getSolutionsVTK(){
-        const std::string output_file_name = "../test/output_meshes/output.vtk";
-        getSolutionsVTK(output_file_name);
-    }
-
     void getSolutionsVTK(const std::string& output_file_name){
         std::string fileName = "../test/output_meshes/" + output_file_name + ".vtk";
         std::ofstream output_file(fileName);
