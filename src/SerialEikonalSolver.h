@@ -9,6 +9,9 @@
 #include "Mesh.h"
 #include "DoubleCircularList.h"
 #include <float.h>
+#include <algorithm>
+#include <type_traits>
+#include <vector>
 #include "../localProblem_alt2/include/Phi.hpp"
 #include "../localProblem_alt2/include/solveEikonalLocalProblem.hpp"
 #include "EikonalSolver.h"
@@ -23,14 +26,20 @@ public:
         for(auto bv : boundary_vertices) {
             this->solutions[bv] = 0;
         }
+        active_vector.resize(this->solutions.size());
     }
 
     void solve(){
+        std::vector<int> present;
+        present.resize(this->solutions.size());
+        std::fill(present.begin(), present.end() , 0);
         for(auto bv : boundary_vertices){
             for(auto neighbor : this->mesh.getNeighbors(bv)){
                 active_list.add(neighbor);
+                present[neighbor] = 1;
             }
         }
+
         while(!active_list.isEmpty()){
             Node* node = active_list.getNext();
             int v = node -> data;
@@ -41,16 +50,62 @@ public:
             if(std::abs(old_solution - new_solution) < eikonal_tol) {
                 std::vector<int> v_neighbours = this->mesh.getNeighbors(v);
                 for (auto b: v_neighbours) {
-                    if (!active_list.isPresent(b)) {
+                    //if (!active_list.isPresent(b)) {
+                    if(present[b] == 0) {
                         double old_solution_b = this->solutions[b];
                         double new_solution_b = update(b);
                         if (old_solution_b > new_solution_b) {
                             this->solutions[b] = new_solution_b;
                             active_list.add(b);
+                            present[b] = 1;
                         }
                     }
                 }
                 active_list.remove(node);
+                present[v] = 0;
+            }
+        }
+    }
+
+    void solve_vector(){
+        std::vector<int> present(this->solutions.size());
+        size_t active_vector_index = 0;
+        size_t current_index = 0;
+        std::fill(present.begin(), present.end() , 0);
+        for(auto bv : boundary_vertices){
+            for(auto neighbor : this->mesh.getNeighbors(bv)){
+                active_vector[active_vector_index] = neighbor;
+                active_vector_index++;
+                present[neighbor] = 1;
+            }
+        }
+
+        while(active_vector_index != 0){
+            int v = active_vector[current_index];
+            double old_solution = this->solutions[v];
+            double new_solution = update(v);
+            this->solutions[v] = new_solution;
+
+            if(std::abs(old_solution - new_solution) < eikonal_tol) {
+                std::vector<int> v_neighbours = this->mesh.getNeighbors(v);
+                for (auto b: v_neighbours) {
+                    if(present[b] == 0) {
+                        double old_solution_b = this->solutions[b];
+                        double new_solution_b = update(b);
+                        if (old_solution_b > new_solution_b) {
+                            this->solutions[b] = new_solution_b;
+                            active_vector[active_vector_index] = b;
+                            active_vector_index++;
+                            present[b] = 1;
+                        }
+                    }
+                }
+                std::shift_left(begin(active_vector) + current_index, end(active_vector), 1);
+                active_vector_index--;
+                present[v] = 0;
+            }
+            if(current_index >= active_vector_index){
+                current_index = 0;
             }
         }
     }
@@ -102,6 +157,7 @@ protected:
 
     std::vector<int>& boundary_vertices;
     DoubleCircularList active_list;
+    std::vector<int> active_vector;
     typename Eikonal::Eikonal_traits<D,N - 2>::MMatrix velocity;
 };
 #endif //EIKONAL_CESARONI_TONARELLI_TRABACCHIN_SERIALEIKONALSOLVER_H

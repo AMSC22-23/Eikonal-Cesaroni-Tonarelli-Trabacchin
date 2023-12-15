@@ -11,10 +11,9 @@
 #include "../src/SerialEikonalSolver.h"
 #include "../src/ParallelEikonalSolver.h"
 
-#define N 4 // Number of vertices in a shape
-#define D 3 // Dimension of the domain
-
 int main(int argc, char* argv[]){
+    constexpr int N = 4;
+    constexpr int D = 3;
     if(argc > 0)
     {
         // Retrieve parameters
@@ -45,13 +44,19 @@ int main(int argc, char* argv[]){
 
         // SERIAL
         auto start1 = std::chrono::high_resolution_clock::now();
-        serial_solver.solve();
+        serial_solver.solve_vector();
         auto stop1 = std::chrono::high_resolution_clock::now();
 
         // PARALLEL
         auto start2 = std::chrono::high_resolution_clock::now();
         parallel_solver.solve();
         auto stop2 = std::chrono::high_resolution_clock::now();
+
+        // Print
+        std::cout << "SOLUTION:\n";
+        for(size_t i = 0 ; i < serial_solver.getSolutions().size(); i++){
+            std::cout << serial_solver.getSolutions()[i] << " " << parallel_solver.getSolutions()[i] << "\n";
+        }
 
         // Performance Result Table
 

@@ -53,7 +53,6 @@ public:
         }
         output_file << std::endl;
         output_file.flush();
-        std::cout << "Output vtk file located in folder test/output_meshes\n";
 
         output_file.close();
     }

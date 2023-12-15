@@ -6,6 +6,7 @@
 #define EIKONAL_CESARONI_TONARELLI_TRABACCHIN_DOUBLECIRCULARLIST_H
 #include <cassert>
 #include <iostream>
+#include <unordered_set>
 struct Node {
     int data;
     Node* next;
@@ -93,6 +94,6 @@ private:
     }
     Node* head;
     Node* curr;
-    std::set<int> present;
+    std::unordered_set<int> present;
 };
 #endif //EIKONAL_CESARONI_TONARELLI_TRABACCHIN_DOUBLECIRCULARLIST_H

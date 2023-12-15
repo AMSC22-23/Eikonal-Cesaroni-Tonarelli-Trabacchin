@@ -10,11 +10,9 @@
 #include "../src/SerialEikonalSolver.h"
 #include "../src/ParallelEikonalSolver.h"
 
-#define N 3 // Number of vertices in a shape
-#define D 2 // Dimension of the domain
-
-
 int main(int argc, char* argv[]){
+    constexpr int N = 3;
+    constexpr int D = 2;
     if(argc > 0)
     {
         // Retrieve parameters

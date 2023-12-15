@@ -66,9 +66,9 @@ where:
     the output filename will be by default `output.vtk`;
 - `num-threads` is the number of threads used in the parallel algorithm.
 
-We have already included some meshes in the folder `test/input_meshes`. For example:
+We have already provided some meshes in the folder `test/input_meshes`. For example:
 ```bash
-$ ./triangulated ../test/input_meshes/triangulated/bunny.vtk output-bunny.vtk 4
+$ ./triangulated ../test/input_meshes/triangulated/bunny.vtk output-bunny 4
 ```
 will execute both the serial and the parallel algorithm on the well-known Stanford Bunny test model.
 
