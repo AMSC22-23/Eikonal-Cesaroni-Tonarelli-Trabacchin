@@ -25,6 +25,7 @@ int main(int argc, char* argv[]){
         // Setting boundary
         std::vector<int> boundary;
         boundary.push_back(mesh.getNearestVertex(std::array<double, D>({0, 0})));
+        boundary.push_back(mesh.getNearestVertex(std::array<double, D>({1, 1})));
 
         // Setting velocity matrix
         typename Eikonal::Eikonal_traits<D, 1>::MMatrix M;

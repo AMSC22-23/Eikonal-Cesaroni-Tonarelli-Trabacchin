@@ -80,4 +80,19 @@ output into the file `output-bunny`.
 
 ## Results
 After extensive testing, we have been able to conclude that the output from the serial solver is correct as well as the
-parallel solver. The parallel solver has shown excellent scaling properties.
+parallel solver. The parallel solver has shown excellent scaling properties. <br>
+
+The following are some examples visualized using Paraview:
+<figure>
+    <img src="images/square-two.png" width="400"
+         alt="Square, two sources">
+    <figcaption>2D square with two wave sources.</figcaption>
+</figure>
+
+<figure>
+    <img src="images/bunny.png" width="400"
+         alt="Square, two sources">
+    <figcaption>Stanford Bunny model.</figcaption>
+</figure>
+
+<br>
