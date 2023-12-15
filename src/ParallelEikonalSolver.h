@@ -46,7 +46,7 @@ public:
         #pragma omp parallel default(none) shared(present, std::cout, active_list, EikonalSolver<D,N>::solutions, activeListIndex, ACTIVE_LIST_LENGTH) num_threads(threads_number)
         {
             int address;
-            std::unordered_map<int,double> vertex_to_solution;
+            std::map<int,double> vertex_to_solution;
             DoubleCircularList local_list;
 
             int thread_id = omp_get_thread_num();
@@ -137,7 +137,7 @@ private:
         }while(!__atomic_compare_exchange(&this->solutions[address],&snap, &value, false, __ATOMIC_RELAXED, __ATOMIC_RELAXED));
     }
 
-    double getLocalSolution(int vertex, const std::unordered_map<int, double>& vertex_to_solution){
+    double getLocalSolution(int vertex, const std::map<int, double>& vertex_to_solution){
         auto it = vertex_to_solution.find(vertex);
         if(it != vertex_to_solution.end()){
             return it->second;
@@ -166,7 +166,7 @@ private:
         return sol.value;
     }
 
-    double update(int vertex, const std::unordered_map<int, double>& vertex_to_solution) {
+    double update(int vertex, const std::map<int, double>& vertex_to_solution) {
         std::vector<int> triangles = this->mesh.getShapes(vertex);
         std::vector<double> sol;
         int number_of_vertices = this->mesh.getVerticesPerShape();

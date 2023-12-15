@@ -94,6 +94,6 @@ private:
     }
     Node* head;
     Node* curr;
-    std::unordered_set<int> present;
+    std::set<int> present;
 };
 #endif //EIKONAL_CESARONI_TONARELLI_TRABACCHIN_DOUBLECIRCULARLIST_H
