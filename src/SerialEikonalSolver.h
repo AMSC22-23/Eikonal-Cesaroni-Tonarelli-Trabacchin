@@ -4,7 +4,6 @@
 
 #ifndef EIKONAL_CESARONI_TONARELLI_TRABACCHIN_SERIALEIKONALSOLVER_H
 #define EIKONAL_CESARONI_TONARELLI_TRABACCHIN_SERIALEIKONALSOLVER_H
-#define eikonal_tol 1e-8
 
 #include "Mesh.h"
 #include "DoubleCircularList.h"
@@ -30,6 +29,8 @@ public:
     }
 
     void solve(){
+        constexpr double eikonal_tol = 1e-4;
+
         std::vector<int> present;
         present.resize(this->solutions.size());
         std::fill(present.begin(), present.end() , 0);
@@ -68,6 +69,7 @@ public:
     }
 
     void solve_vector(){
+        constexpr double eikonal_tol = 1e-6;
         std::vector<int> present(this->solutions.size());
         size_t active_vector_index = 0;
         size_t current_index = 0;

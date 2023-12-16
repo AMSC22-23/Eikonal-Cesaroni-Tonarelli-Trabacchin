@@ -8,7 +8,6 @@
 // Created by tomma on 04/12/2023.
 //
 
-#define eikonal_tol_par 1e-4
 #include "Mesh.h"
 #include "DoubleCircularList.h"
 #include "EikonalSolver.h"
@@ -24,12 +23,13 @@ public:
     ParallelEikonalSolver(Mesh<D>& mesh, std::vector<int>& boundary_vertices,
                           typename Eikonal::Eikonal_traits<D,N - 2>::MMatrix M,  int threads_number) :
             EikonalSolver<D,N>(mesh), boundary_vertices(boundary_vertices), threads_number(threads_number), velocity{M}{
-        this->solutions.resize(mesh.getNumberVertices(), 1000);
+        this->solutions.resize(mesh.getNumberVertices(), DBL_MAX);
         for(auto bv : boundary_vertices)
             this->solutions[bv] = 0;
     }
 
     void solve(){
+        double constexpr eikonal_tol_par = 1e-6;
         std::vector<int> present(this->solutions.size());
         std::fill(present.begin(), present.end(), 0);
         int ACTIVE_LIST_LENGTH = this->solutions.size();
@@ -188,6 +188,8 @@ private:
         double min = *std::min_element(sol.begin(), sol.end());
         return min;
     }
+
+
 
 };
 
