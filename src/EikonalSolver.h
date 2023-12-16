@@ -23,6 +23,11 @@ public:
 
     void getSolutionsVTK(const std::string& output_file_name){
         std::string fileName = "../test/output_meshes/" + output_file_name + ".vtk";
+        /* @note
+        Better avoid having names hardwired in a function, pass them as parameters instead,
+        or have them as private members of the class.
+        Now since C++17 you can use std::filesystem::create_directory("../test/output_meshes")
+        */
         std::ofstream output_file(fileName);
 
         std::string input = mesh.getFilenameInputMesh();

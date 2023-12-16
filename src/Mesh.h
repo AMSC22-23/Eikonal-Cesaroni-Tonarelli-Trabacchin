@@ -12,7 +12,7 @@
 #include <set>
 #include <algorithm>
 #include <numeric>
-#include <float.h>
+#include <float.h>// @note in C++ better use <limits> instead or <cfloat>
 
 template <int D>
 class Mesh {
@@ -46,7 +46,9 @@ public:
         return vertices_per_shape;
     }
 
-    std::vector<int> getNeighbors(size_t vertex){
+// @note A lot of const are missing! I have not reported all of them, but you should add them.
+    std::vector<int> getNeighbors(size_t vertex) const //@note add const
+    {
         std::set<int> neighbors;
         for(size_t i = ngh[vertex]; i < (vertex != ngh.size() -1 ? ngh[vertex + 1] : shapes.size()); i++){
             neighbors.insert(shapes[i]);
@@ -55,15 +57,16 @@ public:
         return res;
     }
 
-    std::vector<int> getShapes(size_t vertex){
+    std::vector<int> getShapes (size_t vertex) const {
         std::vector<int> shapes_v;
         for(size_t i = ngh[vertex]; i < (vertex != ngh.size() -1 ? ngh[vertex + 1] : shapes.size()); i++){
             shapes_v.push_back(shapes[i]);
+            //@note: here is irrelevant, but take the habit of using emplace_back
         }
         return shapes_v;
     }
 
-    std::array<double, D> getCoordinates(int vertex){
+    std::array<double, D> getCoordinates (int vertex) const{
         std::array<double,D> coord;
         for(int i = D * vertex; i < D * vertex + D; i++){
             coord[i - D * vertex] = geo[i];
@@ -71,20 +74,22 @@ public:
         return coord;
     }
 
-    int getMapVertex(int vertex){
+    int getMapVertex(int vertex) const {
         return map_vertices[vertex];
     }
 
-    int getOriginalNumberOfVertices(){
+    int getOriginalNumberOfVertices()const {
         return map_vertices.size();
     }
 
-    std::string getFilenameInputMesh(){
+    std::string getFilenameInputMesh()const {
         return filename_input_mesh;
     }
 
-    int getNearestVertex(std::array<double, D> coordinates){
-        double min_distance = DBL_MAX;
+    int getNearestVertex(std::array<double, D> coordinates) const //@note: const is important
+    {
+        double min_distance = DBL_MAX;//@note in C++ better use <limits> instead or <cfloat>
+        // double min_distance = std::numeric_limits<double>::max();
         int min_vertex = 0;
         for(int i = 0; i < getNumberVertices(); i++){
             double distance = getDistance(coordinates, getCoordinates(i));
@@ -98,7 +103,9 @@ public:
 
 protected:
 
-    double getDistance(std::array<double, D> c1, std::array<double, D> c2){
+  double getDistance 
+    (std::array<double, D> c1, std::array<double, D> c2) const //@note: const is important
+    {
         double res = 0;
         for(int i = 0; i < D; i++){
             res += (c1[i] - c2[i]) * (c1[i] - c2[i]);
@@ -143,7 +150,8 @@ protected:
         geo = reduced_geo;
     }
 
-    int verticesCompare(int i, int j){
+    int verticesCompare(int i, int j) const //@note: const is important
+    {
         for(int k = 0; k < D; k++){
             if(geo[D * i + k] < geo[D * j + k]){
                 return 1;

@@ -22,6 +22,8 @@ public:
     SerialEikonalSolver(Mesh<D>& mesh, std::vector<int>& boundary_vertices, typename Eikonal::Eikonal_traits<D,N - 2>::MMatrix M) :
             EikonalSolver<D, N>(mesh), boundary_vertices(boundary_vertices), velocity{M} {
         this->solutions.resize(mesh.getNumberVertices(), 1000);
+        // @note Better have the "infinity" value not hardwired but passed as a parameter
+        // or have it as a private member of the class.
         for(auto bv : boundary_vertices) {
             this->solutions[bv] = 0;
         }
@@ -29,7 +31,7 @@ public:
     }
 
     void solve(){
-        constexpr double eikonal_tol = 1e-4;
+        constexpr double eikonal_tol = 1e-4; // @note Better have the tolerance not hardwired but passed as a parameter
 
         std::vector<int> present;
         present.resize(this->solutions.size());
@@ -118,7 +120,8 @@ public:
 
 protected:
 
-    double update(int vertex) {
+    double update(int vertex) const //@note I think it is const!
+    {
         std::vector<int> triangles = this->mesh.getShapes(vertex);
         std::vector<double> sol;
         int number_of_vertices = this->mesh.getVerticesPerShape();
@@ -138,10 +141,13 @@ protected:
         }
 
         double min = *std::min_element(sol.begin(), sol.end());
+        // @note in principle you should check if min is smaller than the current solution
+        // and if not, return the current solution.
+        // return std::min(min, this->solutions[vertex]);
         return min;
     }
 
-    double solveLocalProblem(std::array<std::array<double, D>, N> coordinates, std::array<double, N - 1> solutions_base){
+    double solveLocalProblem(std::array<std::array<double, D>, N> coordinates, std::array<double, N - 1> solutions_base) const{
         using VectorExt = typename Eikonal::Eikonal_traits<D, N - 2>::VectorExt;
         VectorExt values;
         for(int i = 0; i < N - 1; i++) {
@@ -154,6 +160,8 @@ protected:
         auto sol = localSolver();
 
         assert(sol.status == 0);
+        //@note in a more production code you should check the status and eventually throw 
+        // an exception, not just assert.
         return sol.value;
     }
 
