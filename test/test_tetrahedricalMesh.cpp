@@ -17,7 +17,7 @@ int main(int argc, char* argv[]){
     if(argc == 5)
     {
         // Retrieve parameters
-        const std::string input_fileName = argv[1];
+        std::string input_fileName = argv[1];
         int num_threads = std::atoi(argv[2]);
 
         // Instantiating mesh
@@ -63,6 +63,15 @@ int main(int argc, char* argv[]){
                 (double)std::chrono::duration_cast<std::chrono::microseconds>(stop2 - start2).count() << std::endl;
         std::cout << std::endl;
 
+        /* OPTINAL: to visualize result in terminal
+        std::cout << "RESULTS:  serial   parallel\n";
+        for(size_t i = 0; i < serial_solver.getSolutions().size(); i++){
+            std::cout << serial_solver.getSolutions()[i] << "  -  "
+                      << serial_solver.getSolutions()[i] << std::endl;
+        }
+        std::cout << std::endl;
+         */
+
         // Writing the output file
         std::string output_fileName = argv[4];
         std::string flag = argv[3];
@@ -71,7 +80,9 @@ int main(int argc, char* argv[]){
                     "with name: " << output_fileName << ".vtk" << std::endl;
             serial_solver.getSolutionsVTK(output_fileName);
         } else {
-            parallel_solver.getSolutionsVTK(output_fileName);
+            std::cout << "Parallel output can be found in ../test/output_meshes" << std::endl <<
+                               "with name: " << output_fileName << ".vtk" << std::endl;
+           parallel_solver.getSolutionsVTK(output_fileName);
         }
         std::cout << "===============================================" << std::endl;
     }

@@ -39,7 +39,7 @@ int main(int argc, char* argv[]){
 
         // SERIAL
         auto start1 = std::chrono::high_resolution_clock::now();
-        serial_solver.solve();
+        serial_solver.solve_vector();
         auto stop1 = std::chrono::high_resolution_clock::now();
 
         // PARALLEL
@@ -71,6 +71,8 @@ int main(int argc, char* argv[]){
                       "with name: " << output_fileName << ".vtk" << std::endl;
             serial_solver.getSolutionsVTK(output_fileName);
         } else {
+            std::cout << "Parallel output can be found in ../test/output_meshes" << std::endl <<
+                      "with name: " << output_fileName << ".vtk" << std::endl;
             parallel_solver.getSolutionsVTK(output_fileName);
         }
         std::cout << "===============================================" << std::endl;
