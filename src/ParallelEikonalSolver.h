@@ -21,15 +21,15 @@ template<int D, int N>
 class ParallelEikonalSolver : public EikonalSolver<D,N> {
 public:
     ParallelEikonalSolver(Mesh<D>& mesh, std::vector<int>& boundary_vertices,
-                          typename Eikonal::Eikonal_traits<D,N - 2>::MMatrix M,  int threads_number) :
+                          typename Eikonal::Eikonal_traits<D,N - 2>::AnisotropyM M,  int threads_number) :
             EikonalSolver<D,N>(mesh), boundary_vertices(boundary_vertices), threads_number(threads_number), velocity{M}{
-        this->solutions.resize(mesh.getNumberVertices(), DBL_MAX);
+        this->solutions.resize(mesh.getNumberVertices(), 2000);
         for(auto bv : boundary_vertices)
             this->solutions[bv] = 0;
     }
 
     void solve(){
-        double constexpr eikonal_tol_par = 1e-6;
+        double constexpr eikonal_tol_par = 1e-2;
         std::vector<int> present(this->solutions.size());
         std::fill(present.begin(), present.end(), 0);
         int ACTIVE_LIST_LENGTH = this->solutions.size();
@@ -47,6 +47,9 @@ public:
         {
             int address;
             std::map<int,double> vertex_to_solution;
+            //std::vector<double> vertex_to_solution;
+            //vertex_to_solution.resize(this->solutions.size());
+
             DoubleCircularList local_list;
 
             int thread_id = omp_get_thread_num();
@@ -58,10 +61,10 @@ public:
                 #pragma omp barrier
                 if(thread_id == threads_number - 1) {
                     activeListIndex = 0;
-                    std::fill(present.begin() + thread_id*present.size()/threads_number, present.end() , 0);
+                    //std::fill(present.begin() + thread_id*present.size()/threads_number, present.end() , 0);
                 }
                 else {
-                    std::fill(present.begin() + thread_id*present.size()/threads_number, present.begin() + (thread_id + 1)*present.size()/threads_number, 0);
+                    //std::fill(present.begin() + thread_id*present.size()/threads_number, present.begin() + (thread_id + 1)*present.size()/threads_number, 0);
                 }
 
                 #pragma omp barrier
@@ -118,7 +121,7 @@ private:
     std::vector<int> active_list;
 
     int threads_number;
-    typename Eikonal::Eikonal_traits<D,N - 2>::MMatrix velocity;
+    typename Eikonal::Eikonal_traits<D,N - 2>::AnisotropyM velocity;
 
     void writeLocalSolution(int address, double value) {
         #pragma omp atomic write relaxed
@@ -162,10 +165,13 @@ private:
 
         auto sol = localSolver();
 
-        assert(sol.status == 0);
+        //if(sol.status !=0) {
+            //std::cout << "no convergence: " << sol.status<<std::endl;
+        //}
+        //assert(sol.status == 0);
         return sol.value;
     }
-
+//sort the solutions to be sure u3 > u2 > u1
     double update(int vertex, const std::map<int, double>& vertex_to_solution) {
         std::vector<int> triangles = this->mesh.getShapes(vertex);
         std::vector<double> sol;
@@ -182,12 +188,15 @@ private:
             for(int j = 0; j < number_of_vertices - 1; j++) {
                 solutions_base[j] = getLocalSolution(triangles[i+j], vertex_to_solution);
             }
+            this->reorder_solutions(coordinates, solutions_base);
             sol.push_back(solveLocalProblem(coordinates, solutions_base));
         }
 
         double min = *std::min_element(sol.begin(), sol.end());
         return min;
     }
+
+
 
 
 

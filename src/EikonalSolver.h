@@ -56,6 +56,36 @@ protected:
     Mesh<D>& mesh;
     std::vector<double> solutions;
 
+    int reorder_solutions(std::array<std::array<double, D>, N>& coordinates, std::array<double, N - 1>& sol) {
+        double tol = 1e-30;
+        double mult = 1e-9;
+
+        for(int i = 0; i < N - 1; i++) {
+            for(int j = i + 1; j < N - 1; j++) {
+                if(std::abs(sol[i] - sol[j]) < tol) {
+                    sol[i] *= (1-mult) * sol[i];
+                }
+            }
+        }
+
+        auto min_sol_value = DBL_MAX;
+        int min_sol_index = 0;
+        for(int i = 0; i < N - 1; i++) {
+            if(sol[i] < min_sol_value) {
+                min_sol_value = sol[i];
+                min_sol_index = i;
+            }
+        }
+        std::swap(sol[min_sol_index], sol[N-2]);
+        std::swap(coordinates[min_sol_index], coordinates[N-2]);
+
+
+        return min_sol_index;
+    }
+
+
+
+
 };
 
 #endif //EIKONAL_CESARONI_TONARELLI_TRABACCHIN_EIKONALSOLVER_H

@@ -46,7 +46,7 @@ struct Phi
 	  {
 		  lambdaExt.template topRows<DIM>()=v;
 		  return du.template topRows<DIM>()+
-				  simplexData.MM_Matrix.template block<DIM,PHDIM>(0,0)*lambdaExt/normL();
+				  simplexData.MM_Matrix.template block<DIM,DIM+1>(0,0)*lambdaExt/normL();
 	  }
 
 	  Matrix hessian(Vector const & v)const
@@ -54,9 +54,9 @@ struct Phi
 		  lambdaExt.template topRows<DIM>()=v;
 		  auto n = 1./normL();
 		  auto n3= n*n*n;
-//		  if constexpr (PHDIM==3u)
-	//	{
-		  Vector part{simplexData.MM_Matrix.template block<DIM,PHDIM>(0,0)*lambdaExt};
+		  //if constexpr (PHDIM==3u)
+		//{
+		  Vector part{simplexData.MM_Matrix.template block<DIM,DIM+1>(0,0)*lambdaExt};
 		  Matrix parta;
 		  parta=simplexData.MM_Matrix.template block<DIM,DIM>(0,0);
 		  Matrix partb;
@@ -65,9 +65,9 @@ struct Phi
 		//}
 		  //else
 		  //{
-			//  Matrix const & M=simplexData.MM_Matrix;
+			  //Matrix const & M=simplexData.MM_Matrix;
 			  //return (M(0,0)*M(1,1)-M(0,1)*M(0,1))/
-				//	  std::pow(lambdaExt(0)*lambdaExt(0)*M(1,1)+2.*lambdaExt(0)*M(0,1)+M(1,1), 3./2.);
+					  //std::pow(lambdaExt(0)*lambdaExt(0)*M(1,1)+2.*lambdaExt(0)*M(0,1)+M(1,1), 3./2.);
 		  //}
 	  }
 

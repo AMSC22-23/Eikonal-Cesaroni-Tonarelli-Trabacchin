@@ -244,7 +244,7 @@ private:
         Scalar gradstep = currentValues.currentGradient.transpose() * searchDirection;
         if(gradstep >= 0.)
         {
-            std::cerr << gradstep << " not valid. Reverted to gradient\n";
+            //std::cerr << gradstep << " not valid. Reverted to gradient\n";
             searchDirection = -currentValues.currentGradient;
             gradstep = -searchDirection.squaredNorm();
         }

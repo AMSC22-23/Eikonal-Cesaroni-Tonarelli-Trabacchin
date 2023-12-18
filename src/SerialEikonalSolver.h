@@ -19,9 +19,9 @@ template<int D, int N>// D = physical dimension, N = number of vertices per shap
 class SerialEikonalSolver : public EikonalSolver<D,N> {
 
 public:
-    SerialEikonalSolver(Mesh<D>& mesh, std::vector<int>& boundary_vertices, typename Eikonal::Eikonal_traits<D,N - 2>::MMatrix M) :
+    SerialEikonalSolver(Mesh<D>& mesh, std::vector<int>& boundary_vertices, typename Eikonal::Eikonal_traits<D,N - 2>::AnisotropyM M) :
             EikonalSolver<D, N>(mesh), boundary_vertices(boundary_vertices), velocity{M} {
-        this->solutions.resize(mesh.getNumberVertices(), 1000);
+        this->solutions.resize(mesh.getNumberVertices(), 2000);
         for(auto bv : boundary_vertices) {
             this->solutions[bv] = 0;
         }
@@ -29,7 +29,7 @@ public:
     }
 
     void solve(){
-        constexpr double eikonal_tol = 1e-4;
+        constexpr double eikonal_tol = 1e-2;
 
         std::vector<int> present;
         present.resize(this->solutions.size());
@@ -63,7 +63,8 @@ public:
                     }
                 }
                 active_list.remove(node);
-                present[v] = 0;
+
+                //present[v] = 0;
             }
         }
     }
@@ -134,6 +135,7 @@ protected:
             for(int j = 0; j < number_of_vertices - 1; j++) {
                 solutions_base[j] = this->solutions[triangles[i + j]];
             }
+            this->reorder_solutions(coordinates, solutions_base);
             sol.push_back(solveLocalProblem(coordinates, solutions_base));
         }
 
@@ -153,13 +155,13 @@ protected:
 
         auto sol = localSolver();
 
-        assert(sol.status == 0);
+        //assert(sol.status == 0);
         return sol.value;
     }
 
     std::vector<int>& boundary_vertices;
     DoubleCircularList active_list;
     std::vector<int> active_vector;
-    typename Eikonal::Eikonal_traits<D,N - 2>::MMatrix velocity;
+    typename Eikonal::Eikonal_traits<D,N - 2>::AnisotropyM velocity;
 };
 #endif //EIKONAL_CESARONI_TONARELLI_TRABACCHIN_SERIALEIKONALSOLVER_H

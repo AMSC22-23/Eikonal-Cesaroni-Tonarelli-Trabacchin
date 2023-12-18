@@ -21,9 +21,10 @@ namespace Eikonal
 	  using Point=Eigen::Matrix<double,PHDIM,1>;
 	  using Edge=Eigen::Matrix<double,PHDIM,1>;
 	  using AnisotropyM=Eigen::Matrix<double,PHDIM,PHDIM>;
-	  using MMatrix=Eigen::Matrix<double,PHDIM,PHDIM>;
-	  using Vector=Eigen::Matrix<double,N,1>;
-	  using VectorExt=Eigen::Matrix<double,PHDIM,1>;
+	  using MMatrix=Eigen::Matrix<double,N+1,N+1>;
+      using EMatrix=Eigen::Matrix<double, PHDIM, N + 1>;
+	  using Vector=Eigen::Matrix<double,PHDIM,1>;
+	  using VectorExt=Eigen::Matrix<double,N + 1,1>;
   };
 }
 
