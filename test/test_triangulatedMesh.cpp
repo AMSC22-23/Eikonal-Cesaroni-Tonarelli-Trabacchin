@@ -66,14 +66,15 @@ int main(int argc, char* argv[]){
         // Writing the output file
         std::string output_fileName = argv[4];
         std::string flag = argv[3];
+        std::string fileName = "../test/output_meshes/" + output_fileName + ".vtk";
         if(flag == "s") {
             std::cout << "Serial output can be found in ../test/output_meshes" << std::endl <<
                       "with name: " << output_fileName << ".vtk" << std::endl;
-            serial_solver.getSolutionsVTK(output_fileName);
+            serial_solver.getSolutionsVTK(fileName);
         } else {
             std::cout << "Parallel output can be found in ../test/output_meshes" << std::endl <<
                       "with name: " << output_fileName << ".vtk" << std::endl;
-            parallel_solver.getSolutionsVTK(output_fileName);
+            parallel_solver.getSolutionsVTK(fileName);
         }
         std::cout << "===============================================" << std::endl;
     }
