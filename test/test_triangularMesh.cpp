@@ -38,7 +38,7 @@ int main(int argc, char* argv[]){
 
         // SERIAL
         auto start1 = std::chrono::high_resolution_clock::now();
-        serial_solver.solve();
+        serial_solver.solve_vector();
         auto stop1 = std::chrono::high_resolution_clock::now();
 
         // PARALLEL
@@ -62,14 +62,25 @@ int main(int argc, char* argv[]){
                                       (double)std::chrono::duration_cast<std::chrono::microseconds>(stop2 - start2).count() << std::endl;
         std::cout << std::endl;
 
+        /* OPTINAL: to visualize result in terminal
+        std::cout << "RESULTS:  serial   parallel\n";
+        for(size_t i = 0; i < serial_solver.getSolutions().size(); i++){
+            std::cout << serial_solver.getSolutions()[i] << "  -  "
+                      << serial_solver.getSolutions()[i] << std::endl;
+        }
+        std::cout << std::endl;
+         */
+
         // Writing the output file
-        std::string output_fileName = argv[4];
-        std::string flag = argv[3];
+        const std::string output_fileName = argv[4];
+        const std::string flag = argv[3];
         if(flag == "s") {
             std::cout << "Serial output can be found in ../test/output_meshes" << std::endl <<
                       "with name: " << output_fileName << ".vtk" << std::endl;
             serial_solver.getSolutionsVTK(output_fileName);
         } else {
+            std::cout << "Parallel output can be found in ../test/output_meshes" << std::endl <<
+                      "with name: " << output_fileName << ".vtk" << std::endl;
             parallel_solver.getSolutionsVTK(output_fileName);
         }
         std::cout << "===============================================" << std::endl;
