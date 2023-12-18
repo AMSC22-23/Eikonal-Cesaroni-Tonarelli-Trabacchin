@@ -28,7 +28,7 @@ int main(int argc, char* argv[]){
         boundary.push_back(mesh.getNearestVertex(std::array<double, D>({0, 0, 0})));
 
         // Setting velocity matrix
-        typename Eikonal::Eikonal_traits<D, 1>::MMatrix M;
+        typename Eikonal::Eikonal_traits<D, 1>::AnisotropyM M;
         M << 1, 0, 0,
              0, 1, 0,
              0, 0, 1;
