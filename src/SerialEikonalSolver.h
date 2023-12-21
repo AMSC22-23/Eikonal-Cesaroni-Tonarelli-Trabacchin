@@ -7,7 +7,7 @@
 
 #include "Mesh.h"
 #include "DoubleCircularList.h"
-#include <float.h>
+#include <climits>
 #include <algorithm>
 #include <type_traits>
 #include <vector>
@@ -19,9 +19,13 @@ template<int D, int N>// D = physical dimension, N = number of vertices per shap
 class SerialEikonalSolver : public EikonalSolver<D,N> {
 
 public:
-    SerialEikonalSolver(Mesh<D>& mesh, std::vector<int>& boundary_vertices, typename Eikonal::Eikonal_traits<D,N - 2>::AnisotropyM M) :
-            EikonalSolver<D, N>(mesh), boundary_vertices(boundary_vertices), velocity{M} {
-        this->solutions.resize(mesh.getNumberVertices(), 2000);
+    SerialEikonalSolver(Mesh<D>& mesh, std::vector<int>& boundary_vertices,
+                        typename Eikonal::Eikonal_traits<D,N - 2>::AnisotropyM M,
+                        const double tol, const double inf_value) :
+            EikonalSolver<D, N>(mesh), boundary_vertices(boundary_vertices),
+            velocity{M}, eikonal_tol(tol), infinity_value(inf_value)
+    {
+        this->solutions.resize(mesh.getNumberVertices(), infinity_value);
         for(auto bv : boundary_vertices) {
             this->solutions[bv] = 0;
         }
@@ -29,8 +33,6 @@ public:
     }
 
     void solve(){
-        constexpr double eikonal_tol = 1e-2;
-
         std::vector<int> present;
         present.resize(this->solutions.size());
         std::fill(present.begin(), present.end() , 0);
@@ -70,7 +72,6 @@ public:
     }
 
     void solve_vector(){
-        constexpr double eikonal_tol = 1e-6;
         std::vector<int> present(this->solutions.size());
         size_t active_vector_index = 0;
         size_t current_index = 0;
@@ -123,7 +124,7 @@ protected:
         std::vector<int> triangles = this->mesh.getShapes(vertex);
         std::vector<double> sol;
         int number_of_vertices = this->mesh.getVerticesPerShape();
-        sol.resize(triangles.size() / D, DBL_MAX);
+        sol.resize(triangles.size() / D, std::numeric_limits<double>::max());
         for(size_t i = 0; i < triangles.size(); i += number_of_vertices - 1){
             std::array<std::array<double, D>, N> coordinates;
             std::array<double, N - 1> solutions_base;
@@ -135,7 +136,7 @@ protected:
             for(int j = 0; j < number_of_vertices - 1; j++) {
                 solutions_base[j] = this->solutions[triangles[i + j]];
             }
-            this->reorder_solutions(coordinates, solutions_base);
+            //this->reorder_solutions(coordinates, solutions_base);
             sol.push_back(solveLocalProblem(coordinates, solutions_base));
         }
 
@@ -163,5 +164,7 @@ protected:
     DoubleCircularList active_list;
     std::vector<int> active_vector;
     typename Eikonal::Eikonal_traits<D,N - 2>::AnisotropyM velocity;
+    const double eikonal_tol;
+    const double infinity_value;
 };
 #endif //EIKONAL_CESARONI_TONARELLI_TRABACCHIN_SERIALEIKONALSOLVER_H

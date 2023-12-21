@@ -11,7 +11,7 @@
 #include "Mesh.h"
 #include "DoubleCircularList.h"
 #include "EikonalSolver.h"
-#include <cfloat>
+#include <climits>
 #include "../localProblem_alt2/include/Phi.hpp"
 #include "../localProblem_alt2/include/solveEikonalLocalProblem.hpp"
 #include "omp.h"
@@ -21,15 +21,17 @@ template<int D, int N>
 class ParallelEikonalSolver : public EikonalSolver<D,N> {
 public:
     ParallelEikonalSolver(Mesh<D>& mesh, std::vector<int>& boundary_vertices,
-                          typename Eikonal::Eikonal_traits<D,N - 2>::AnisotropyM M,  int threads_number) :
-            EikonalSolver<D,N>(mesh), boundary_vertices(boundary_vertices), threads_number(threads_number), velocity{M}{
-        this->solutions.resize(mesh.getNumberVertices(), 2000);
+                          typename Eikonal::Eikonal_traits<D,N - 2>::AnisotropyM M,
+                          int threads_number, const double tol, const double inf_value) :
+            EikonalSolver<D,N>(mesh), boundary_vertices(boundary_vertices),
+            threads_number(threads_number), velocity{M}, eikonal_tol(tol), infinity_value(inf_value)
+    {
+        this->solutions.resize(mesh.getNumberVertices(), infinity_value);
         for(auto bv : boundary_vertices)
             this->solutions[bv] = 0;
     }
 
     void solve(){
-        double constexpr eikonal_tol_par = 1e-2;
         std::vector<int> present(this->solutions.size());
         std::fill(present.begin(), present.end(), 0);
         int ACTIVE_LIST_LENGTH = this->solutions.size();
@@ -78,7 +80,7 @@ public:
                     address = v;
                     writeLocalSolutionEfficient(address, new_solution);
                     vertex_to_solution[v] = new_solution;
-                    if (std::abs(old_solution - new_solution) < eikonal_tol_par) {
+                    if (std::abs(old_solution - new_solution) < eikonal_tol) {
                         std::vector<int> v_neighbours = this->mesh.getNeighbors(v);
                         for (auto b: v_neighbours) {
                             int isPresent;
@@ -119,9 +121,10 @@ public:
 private:
     std::vector<int>& boundary_vertices;
     std::vector<int> active_list;
-
     int threads_number;
     typename Eikonal::Eikonal_traits<D,N - 2>::AnisotropyM velocity;
+    const double eikonal_tol;
+    const double infinity_value;
 
     void writeLocalSolution(int address, double value) {
         #pragma omp atomic write relaxed
@@ -171,12 +174,13 @@ private:
         //assert(sol.status == 0);
         return sol.value;
     }
-//sort the solutions to be sure u3 > u2 > u1
+
+    //sort the solutions to be sure u3 > u2 > u1
     double update(int vertex, const std::map<int, double>& vertex_to_solution) {
         std::vector<int> triangles = this->mesh.getShapes(vertex);
         std::vector<double> sol;
         int number_of_vertices = this->mesh.getVerticesPerShape();
-        sol.resize(triangles.size() / D, DBL_MAX);
+        sol.resize(triangles.size() / D, std::numeric_limits<double>::max());
         for(size_t i = 0; i < triangles.size(); i += number_of_vertices - 1){
             std::array<std::array<double, D>, N> coordinates;
             std::array<double, N - 1> solutions_base;
@@ -195,10 +199,6 @@ private:
         double min = *std::min_element(sol.begin(), sol.end());
         return min;
     }
-
-
-
-
 
 };
 

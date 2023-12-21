@@ -99,9 +99,9 @@ apsc::LinearSearchSolver<N>::solve()
           newPoint=currentPoint;
           newValue=currentValue;
           if(status == 1)
-            std::cerr<<"Error in LinearSearchSolver: I have found a non-descent direction.";
+            //std::cerr<<"Error in LinearSearchSolver: I have found a non-descent direction.";
           else // if(not bounded) // this test is disabled for bounded problems
-            std::cerr<<"Error in LinearSearchSolver: I cannot satisfy the sufficient decrease condition.";
+            //std::cerr<<"Error in LinearSearchSolver: I cannot satisfy the sufficient decrease condition.";
         }
       else
         {

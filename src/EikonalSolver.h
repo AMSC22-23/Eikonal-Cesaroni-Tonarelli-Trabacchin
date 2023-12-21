@@ -9,6 +9,7 @@
 #include <filesystem>
 #include <fstream>
 #include <iostream>
+#include <climits>
 #include "../localProblem_alt2/include/Eikonal_traits.hpp"
 
 template<int D, int N>
@@ -67,7 +68,7 @@ protected:
             }
         }
 
-        auto min_sol_value = DBL_MAX;
+        auto min_sol_value = std::numeric_limits<double>::max();
         int min_sol_index = 0;
         for(int i = 0; i < N - 1; i++) {
             if(sol[i] < min_sol_value) {
