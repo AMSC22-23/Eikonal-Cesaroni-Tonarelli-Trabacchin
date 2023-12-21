@@ -200,8 +200,8 @@ private:
                 newValue=currentValue;
                 if(status == 1)
                     std::cerr<<"Error in LinearSearchSolver: I have found a non-descent direction.";
-                else // if(not bounded) // this test is disabled for bounded problems
-                    std::cerr<<"Error in LinearSearchSolver: I cannot satisfy the sufficient decrease condition.";
+                //else // if(not bounded) // this test is disabled for bounded problems
+                    //std::cerr<<"Error in LinearSearchSolver: I cannot satisfy the sufficient decrease condition.";
             }
             else
             {
@@ -244,7 +244,7 @@ private:
         Scalar gradstep = currentValues.currentGradient.transpose() * searchDirection;
         if(gradstep >= 0.)
         {
-            //std::cerr << gradstep << " not valid. Reverted to gradient\n";
+            std::cerr << gradstep << " not valid. Reverted to gradient\n";
             searchDirection = -currentValues.currentGradient;
             gradstep = -searchDirection.squaredNorm();
         }

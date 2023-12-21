@@ -9,6 +9,7 @@
 #include <filesystem>
 #include <fstream>
 #include <iostream>
+#include <climits>
 #include "../localProblem_alt2/include/Eikonal_traits.hpp"
 
 template<int D, int N>
@@ -22,8 +23,7 @@ public:
     virtual std::vector<double> getSolutions() = 0;
 
     void getSolutionsVTK(const std::string& output_file_name){
-        std::string fileName = "../test/output_meshes/" + output_file_name + ".vtk";
-        std::ofstream output_file(fileName);
+        std::ofstream output_file(output_file_name);
 
         std::string input = mesh.getFilenameInputMesh();
         std::ifstream input_file(input);
@@ -68,7 +68,7 @@ protected:
             }
         }
 
-        auto min_sol_value = DBL_MAX;
+        auto min_sol_value = std::numeric_limits<double>::max();
         int min_sol_index = 0;
         for(int i = 0; i < N - 1; i++) {
             if(sol[i] < min_sol_value) {

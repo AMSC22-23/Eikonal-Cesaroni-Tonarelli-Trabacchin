@@ -14,6 +14,8 @@
 int main(int argc, char* argv[]){
     constexpr int N = 4;
     constexpr int D = 3;
+    const double tol = 1e-6;
+    const double infinity_value = 2000;
     if(argc == 5)
     {
         // Retrieve parameters
@@ -26,6 +28,7 @@ int main(int argc, char* argv[]){
         // Setting boundary
         std::vector<int> boundary;
         boundary.push_back(mesh.getNearestVertex(std::array<double, D>({0, 0, 0})));
+        // boundary.push_back(mesh.getNearestVertex(std::array<double, D>({1, 1, 1})));
 
         // Setting velocity matrix
         typename Eikonal::Eikonal_traits<D, 1>::AnisotropyM M;
@@ -34,12 +37,12 @@ int main(int argc, char* argv[]){
              0, 0, 1;
 
         // Instantiating Eikonal Solver
-        SerialEikonalSolver<D, N> serial_solver(mesh, boundary, M);
-        ParallelEikonalSolver<D, N> parallel_solver(mesh, boundary, M, num_threads);
+        SerialEikonalSolver<D, N> serial_solver(mesh, boundary, M, tol, infinity_value);
+        ParallelEikonalSolver<D, N> parallel_solver(mesh, boundary, M, num_threads, tol, infinity_value);
 
         // SERIAL
         auto start1 = std::chrono::high_resolution_clock::now();
-        serial_solver.solve_vector();
+        serial_solver.solve();
         auto stop1 = std::chrono::high_resolution_clock::now();
 
         // PARALLEL
@@ -75,14 +78,15 @@ int main(int argc, char* argv[]){
         // Writing the output file
         std::string output_fileName = argv[4];
         std::string flag = argv[3];
+        std::string fileName = "../test/output_meshes/" + output_fileName + ".vtk";
         if(flag == "s") {
             std::cout << "Serial output can be found in ../test/output_meshes" << std::endl <<
                     "with name: " << output_fileName << ".vtk" << std::endl;
-            serial_solver.getSolutionsVTK(output_fileName);
+            serial_solver.getSolutionsVTK(fileName);
         } else {
             std::cout << "Parallel output can be found in ../test/output_meshes" << std::endl <<
                                "with name: " << output_fileName << ".vtk" << std::endl;
-           parallel_solver.getSolutionsVTK(output_fileName);
+           parallel_solver.getSolutionsVTK(fileName);
         }
         std::cout << "===============================================" << std::endl;
     }

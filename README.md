@@ -95,4 +95,10 @@ The following are some examples visualized using Paraview:
     <figcaption>Stanford Bunny model.</figcaption>
 </figure>
 
+<figure>
+    <img src="images/cube.png" width="400"
+         alt="Cube, two sources">
+    <figcaption>3D cube with two wave sources.</figcaption>
+</figure>
+
 <br>
