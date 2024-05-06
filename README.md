@@ -96,6 +96,12 @@ The following are some examples visualized using Paraview:
 </figure>
 
 <figure>
+    <img src="images/lucy.png" width="700"
+         alt="Square, two sources">
+    <figcaption> Lucy model with one wave source.</figcaption>
+</figure>
+
+<figure>
     <img src="images/cube.png" width="400"
          alt="Cube, two sources">
     <figcaption>3D cube with two wave sources.</figcaption>
