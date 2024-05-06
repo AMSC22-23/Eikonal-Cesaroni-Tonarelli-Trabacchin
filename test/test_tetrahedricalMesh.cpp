@@ -57,10 +57,10 @@ int main(int argc, char* argv[]){
         std::cout << "Number of threads = " << num_threads << std::endl;
         std::cout << std::endl;
         std::cout << "Serial execution time = " <<
-                  std::chrono::duration_cast<std::chrono::microseconds>(stop1 - start1).count() << std::endl;
+                  std::chrono::duration_cast<std::chrono::microseconds>(stop1 - start1).count() << " microseconds." << std::endl;
 
         std::cout << "Parallel execution time = " <<
-                  std::chrono::duration_cast<std::chrono::microseconds>(stop2 - start2).count() << std::endl;
+                  std::chrono::duration_cast<std::chrono::microseconds>(stop2 - start2).count() << " microseconds." << std::endl;
 
         std::cout << "Speed Up = " << (double)std::chrono::duration_cast<std::chrono::microseconds>(stop1 - start1).count() /
                 (double)std::chrono::duration_cast<std::chrono::microseconds>(stop2 - start2).count() << std::endl;
