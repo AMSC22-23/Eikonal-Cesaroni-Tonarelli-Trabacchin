@@ -24,6 +24,7 @@ int main(int argc, char* argv[]){
 
         // Instantiating mesh
         TetrahedricalMesh<D> mesh(input_fileName);
+        std::cout << "done reading mesh" << std::endl;
 
         // Setting boundary
         std::vector<int> boundary;
@@ -42,7 +43,7 @@ int main(int argc, char* argv[]){
 
         // SERIAL
         auto start1 = std::chrono::high_resolution_clock::now();
-        serial_solver.solve();
+        //serial_solver.solve();
         auto stop1 = std::chrono::high_resolution_clock::now();
 
         // PARALLEL

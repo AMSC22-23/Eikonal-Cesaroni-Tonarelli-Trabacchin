@@ -192,15 +192,16 @@ protected:
             sets.resize(vertices_number);
             ngh.resize(vertices_number);
             for(int i=0; i<triangle_number; i++){
-                mesh_file>>buffer;
+                int element_type;
+                mesh_file>>element_type;
                 std::vector<int> tmp;
-                tmp.resize(vertices_per_shape);
-                for(int j=0; j<vertices_per_shape; j++){
+                tmp.resize(element_type);
+                for(int j=0; j<element_type; j++){
                     mesh_file>>tmp[j];
                     tmp[j] = map_vertices[tmp[j]];
                 }
-                for(int j=0; j < vertices_per_shape; j++){
-                    for(int k=0; k < vertices_per_shape; k++){
+                for(int j=0; j < element_type; j++){
+                    for(int k=0; k < element_type; k++){
                         if(j!=k){
                             sets[tmp[j]].insert(tmp[k]);
                         }

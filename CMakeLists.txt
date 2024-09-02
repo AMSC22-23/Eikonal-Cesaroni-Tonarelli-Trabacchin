@@ -3,8 +3,8 @@ project(Eikonal_Cesaroni_Tonarelli_Trabacchin)
 
 set(CMAKE_CXX_STANDARD 20)
 include_directories(src)
-#include_directories("/u/sw/toolchains/gcc-glibc/11.2.0/pkgs/eigen/3.3.9/include/eigen3")
-include_directories("/apps/USE/easybuild/release/2023.1/software/Eigen/3.4.0-GCCcore-12.3.0/include/Eigen") #for MeluXina
+include_directories("/u/sw/toolchains/gcc-glibc/11.2.0/pkgs/eigen/3.3.9/include/eigen3")
+#include_directories("/apps/USE/easybuild/release/2023.1/software/Eigen/3.4.0-GCCcore-12.3.0/include/Eigen") #for MeluXina
 include_directories(${EIGEN})
 include_directories("localProblem/include")
 add_compile_options(-I${mkEigenInc})
